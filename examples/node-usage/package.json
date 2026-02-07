@@ -1,0 +1,17 @@
+{
+    "name": "zenvio-node-example",
+    "version": "1.0.0",
+    "description": "Example usage of Zenvio Node.js SDK",
+    "main": "src/index.ts",
+    "scripts": {
+        "start": "ts-node src/index.ts"
+    },
+    "dependencies": {
+        "@zenvio/sdk-node": "^0.1.0"
+    },
+    "devDependencies": {
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3",
+        "@types/node": "^20.11.0"
+    }
+}

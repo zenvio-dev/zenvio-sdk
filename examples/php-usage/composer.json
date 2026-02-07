@@ -1,0 +1,8 @@
+{
+    "name": "zenvio/php-example",
+    "description": "Example usage of Zenvio PHP SDK",
+    "type": "project",
+    "require": {
+        "zenvio/zenvio-sdk": "^0.1.0"
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "name": "zenvio-monorepo",
+    "private": true,
+    "description": "Zenvio SDK Monorepo",
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "build": "npm run build --workspaces",
+        "test": "jest"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/jest": "^30.0.0",
+        "@types/supertest": "^6.0.3",
+        "jest": "^30.2.0",
+        "supertest": "^7.2.2",
+        "ts-jest": "^29.4.6",
+        "ts-node": "^10.9.2"
+    }
+}

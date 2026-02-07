@@ -1,0 +1,19 @@
+{
+    "name": "@zenvio/api",
+    "version": "0.1.0",
+    "description": "Zenvio Backend API",
+    "private": true,
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js"
+    },
+    "dependencies": {
+        "@zenvio/core": "*",
+        "express": "^4.18.2"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.0",
+        "@types/express": "^4.17.21"
+    }
+}
