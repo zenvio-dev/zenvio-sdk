@@ -1,3 +1,58 @@
-from .client import Zenvio
+"""
+Zenvio SDK para Python — WhatsApp, SMS, Email e envio por template.
+Alinhado à API v1 (api.zenvio.com).
+"""
 
-__all__ = ["Zenvio"]
+from .client import Zenvio
+from .types import (
+    EmailCancelResponse,
+    EmailSendParams,
+    EmailSendResponse,
+    EmailStatus,
+    EmailStatusResponse,
+    MessagesSendParams,
+    MessagesSendResponse,
+    SmsSendParams,
+    SmsSendResponse,
+    SmsStatus,
+    SmsStatusResponse,
+    TemplateChannel,
+    WhatsAppCreateInstanceParams,
+    WhatsAppCreateInstanceResponse,
+    WhatsAppInstance,
+    WhatsAppInstanceActionResponse,
+    WhatsAppInstanceListParams,
+    WhatsAppInstanceListResponse,
+    WhatsAppMessageActionResponse,
+    WhatsAppMessageStatus,
+    WhatsAppMessageType,
+    WhatsAppSendParams,
+    WhatsAppSendResponse,
+)
+
+__all__ = [
+    "Zenvio",
+    "WhatsAppMessageType",
+    "WhatsAppSendParams",
+    "WhatsAppSendResponse",
+    "WhatsAppMessageStatus",
+    "WhatsAppMessageActionResponse",
+    "WhatsAppInstance",
+    "WhatsAppInstanceListParams",
+    "WhatsAppInstanceListResponse",
+    "WhatsAppCreateInstanceParams",
+    "WhatsAppCreateInstanceResponse",
+    "WhatsAppInstanceActionResponse",
+    "SmsSendParams",
+    "SmsSendResponse",
+    "SmsStatus",
+    "SmsStatusResponse",
+    "EmailSendParams",
+    "EmailSendResponse",
+    "EmailStatus",
+    "EmailStatusResponse",
+    "EmailCancelResponse",
+    "TemplateChannel",
+    "MessagesSendParams",
+    "MessagesSendResponse",
+]

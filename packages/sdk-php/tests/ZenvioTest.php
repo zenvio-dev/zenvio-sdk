@@ -8,51 +8,142 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Middleware;
 use Zenvio\Zenvio;
-use Zenvio\Models\SendParams;
+use Zenvio\Exception\ZenvioApiException;
 
 class ZenvioTest extends TestCase
 {
     private array $container = [];
 
-    private function getMockClient(array $responses)
+    private function getMockClient(array $responses): Zenvio
     {
         $mock = new MockHandler($responses);
         $history = Middleware::history($this->container);
         $handlerStack = HandlerStack::create($mock);
         $handlerStack->push($history);
-
         return new Zenvio('test-key', 'https://api.zenvio.com/v1', ['handler' => $handlerStack]);
     }
 
-    public function testWhatsAppSendExhaustive()
+    public function testWhatsAppSendText(): void
     {
         $zenvio = $this->getMockClient([
-            new Response(200, [], json_encode(['success' => true])),
-            new Response(200, [], json_encode(['success' => true])),
-            new Response(200, [], json_encode(['success' => true])),
-            new Response(400, [], json_encode(['success' => false, 'error' => 'API Error']))
+            new Response(200, [], json_encode(['message_ids' => ['msg-123'], 'status' => 'queued'])),
         ]);
+        $resp = $zenvio->whatsapp->sendText('instance-1', ['5511999999999'], 'Hello');
+        $this->assertIsArray($resp);
+        $this->assertSame(['msg-123'], $resp['message_ids']);
+        $this->assertSame('queued', $resp['status']);
+    }
 
-        // 1. Send Text Shortcut
-        $resp = $zenvio->whatsapp->sendText('p', '123', 'Hello');
-        $this->assertTrue($resp->success);
-
-        // 2. Send Image
-        $resp = $zenvio->whatsapp->send('p', [
-            'to' => ['123'],
-            'type' => 'image',
-            'payload' => ['url' => 'http://i.png']
+    public function testWhatsAppSendErrorThrows(): void
+    {
+        $zenvio = $this->getMockClient([
+            new Response(400, [], json_encode(['error' => 'Invalid instance'])),
         ]);
-        $this->assertTrue($resp->success);
-        $this->assertEquals('image', $this->container[1]['request']->getUri()->getPath() ? 'image' : 'image'); // dummy check for history
+        $this->expectException(ZenvioApiException::class);
+        $zenvio->whatsapp->sendText('x', ['123'], 'hi');
+    }
 
-        // 3. Send Template
-        $resp = $zenvio->whatsapp->send('p', new SendParams(['123'], 'template', ['key' => 'k', 'language' => 'en']));
-        $this->assertTrue($resp->success);
+    public function testWhatsAppSendWithParams(): void
+    {
+        $zenvio = $this->getMockClient([
+            new Response(200, [], json_encode(['message_ids' => ['m1'], 'status' => 'queued'])),
+        ]);
+        $resp = $zenvio->whatsapp->send('instance-1', [
+            'to' => ['5511888888888'],
+            'type' => 'text',
+            'payload' => ['message' => 'Hi'],
+        ]);
+        $this->assertSame(['m1'], $resp['message_ids']);
+    }
 
-        // 4. Error Handling
-        $resp = $zenvio->whatsapp->sendText('p', '1', 'hi');
-        $this->assertFalse($resp->success);
-        $this->assertEquals('API Error', $resp->error);
+    public function testWhatsAppGetMessage(): void
+    {
+        $zenvio = $this->getMockClient([
+            new Response(200, [], json_encode(['message_id' => 'msg-1', 'status' => 'delivered'])),
+        ]);
+        $resp = $zenvio->whatsapp->getMessage('msg-1');
+        $this->assertSame('msg-1', $resp['message_id']);
+        $this->assertSame('delivered', $resp['status']);
+    }
+
+    public function testWhatsAppListInstances(): void
+    {
+        $zenvio = $this->getMockClient([
+            new Response(200, [], json_encode(['success' => true, 'data' => [], 'pagination' => ['total' => 0]])),
+        ]);
+        $resp = $zenvio->whatsapp->listInstances();
+        $this->assertTrue($resp['success']);
+    }
+
+    public function testSmsSend(): void
+    {
+        $zenvio = $this->getMockClient([
+            new Response(200, [], json_encode([
+                'success' => true,
+                'data' => ['status' => 'queued', 'count' => 1, 'sms_ids' => ['sms-1']],
+            ])),
+        ]);
+        $resp = $zenvio->sms->send(['to' => ['5511999999999'], 'message' => 'Test']);
+        $this->assertTrue($resp['success']);
+        $this->assertSame(['sms-1'], $resp['data']['sms_ids']);
+    }
+
+    public function testSmsGet(): void
+    {
+        $zenvio = $this->getMockClient([
+            new Response(200, [], json_encode([
+                'success' => true,
+                'data' => ['sms_id' => 'sms-1', 'status' => 'delivered'],
+            ])),
+        ]);
+        $resp = $zenvio->sms->get('sms-1');
+        $this->assertSame('sms-1', $resp['data']['sms_id']);
+    }
+
+    public function testEmailSend(): void
+    {
+        $zenvio = $this->getMockClient([
+            new Response(200, [], json_encode([
+                'success' => true,
+                'data' => ['email_ids' => ['email-1'], 'status' => 'queued'],
+            ])),
+        ]);
+        $resp = $zenvio->email->send([
+            'from' => 'noreply@example.com',
+            'to' => ['u@example.com'],
+            'subject' => 'Test',
+            'text' => 'Body',
+        ]);
+        $this->assertSame(['email-1'], $resp['data']['email_ids']);
+    }
+
+    public function testEmailCancel(): void
+    {
+        $zenvio = $this->getMockClient([
+            new Response(200, [], json_encode([
+                'success' => true,
+                'data' => ['email_id' => 'email-1', 'status' => 'cancelled'],
+            ])),
+        ]);
+        $resp = $zenvio->email->cancel('email-1');
+        $this->assertTrue($resp['success']);
+    }
+
+    public function testMessagesSend(): void
+    {
+        $zenvio = $this->getMockClient([
+            new Response(200, [], json_encode([
+                'success' => true,
+                'data' => ['message_ids' => ['m1', 'm2'], 'status' => 'queued', 'count' => 2],
+            ])),
+        ]);
+        $resp = $zenvio->messages->send([
+            'to' => ['5511999999999'],
+            'template' => 'welcome',
+            'variables' => ['name' => 'User'],
+            'channels' => ['whatsapp', 'sms'],
+            'instance_id' => 'inst-1',
+        ]);
+        $this->assertSame(['m1', 'm2'], $resp['data']['message_ids']);
     }
 }

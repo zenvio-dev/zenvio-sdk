@@ -1,51 +1,58 @@
 import express from 'express';
 import request from 'supertest';
 
-// Simple dummy API for demonstration
 const app = express();
 app.use(express.json());
 
-app.post('/v1/whatsapp/:phoneId/messages', (req, res) => {
-    const { phoneId } = req.params;
-    const { to, type, payload } = req.body;
+// Matches real API: POST /v1/whatsapp/send (body: instance_id, to, type, payload)
+app.post('/v1/whatsapp/send', (req, res) => {
+  const { instance_id, to, type, payload } = req.body;
 
-    if (!phoneId || !to || !type || !payload) {
-        return res.status(400).json({ success: false, error: 'Missing required fields' });
-    }
+  if (!instance_id || !to || !type || !payload) {
+    return res.status(400).json({ success: false, error: 'Missing required fields' });
+  }
 
-    // Basic validation based on our rules
-    if (type === 'text' && !payload.text) {
-        return res.status(400).json({ success: false, error: 'Text payload requires text field' });
-    }
+  if (type === 'text' && !payload.message) {
+    return res.status(400).json({ success: false, error: 'Text payload requires message field' });
+  }
 
-    res.json({ success: true, messageId: 'api-msg-999' });
+  if (['image', 'video', 'audio', 'document'].includes(type) && !payload.media_url) {
+    return res.status(400).json({ success: false, error: `${type} requires payload.media_url` });
+  }
+
+  res.status(202).json({
+    message_ids: ['api-msg-999'],
+    status: 'queued',
+  });
 });
 
-describe('Backend API Contract', () => {
-    it('should accept a valid request', async () => {
-        const response = await request(app)
-            .post('/v1/whatsapp/phone-123/messages')
-            .send({
-                to: ['5511999999999'],
-                type: 'text',
-                payload: { text: 'Hello' }
-            });
+describe('Backend API Contract (WhatsApp send)', () => {
+  it('accepts POST /v1/whatsapp/send with instance_id in body', async () => {
+    const response = await request(app)
+      .post('/v1/whatsapp/send')
+      .send({
+        instance_id: 'instance-123',
+        to: ['5511999999999'],
+        type: 'text',
+        payload: { message: 'Hello' },
+      });
 
-        expect(response.status).toBe(200);
-        expect(response.body.success).toBe(true);
-        expect(response.body.messageId).toBe('api-msg-999');
-    });
+    expect(response.status).toBe(202);
+    expect(response.body.message_ids).toEqual(['api-msg-999']);
+    expect(response.body.status).toBe('queued');
+  });
 
-    it('should reject invalid payload for text type', async () => {
-        const response = await request(app)
-            .post('/v1/whatsapp/phone-123/messages')
-            .send({
-                to: ['5511999999999'],
-                type: 'text',
-                payload: { url: 'http://missing-text' }
-            });
+  it('rejects text type without payload.message', async () => {
+    const response = await request(app)
+      .post('/v1/whatsapp/send')
+      .send({
+        instance_id: 'instance-123',
+        to: ['5511999999999'],
+        type: 'text',
+        payload: { url: 'http://wrong' },
+      });
 
-        expect(response.status).toBe(400);
-        expect(response.body.success).toBe(false);
-    });
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+  });
 });

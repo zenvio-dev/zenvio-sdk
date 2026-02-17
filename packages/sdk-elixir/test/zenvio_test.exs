@@ -11,41 +11,119 @@ defmodule ZenvioTest do
     assert client.base_url == "https://api.zenvio.com/v1"
   end
 
-  test "send_text success", %{client: client} do
-    adapter = fn %Req.Request{} = req ->
-      assert req.method == :post
-      assert req.url.path == "/whatsapp/phone-123/messages"
-      Req.Response.new(status: 200, body: %{"success" => true, "messageId" => "elixir-1"})
+  describe "WhatsApp" do
+    test "send_text success", %{client: client} do
+      adapter = fn %Req.Request{} = req ->
+        assert req.options[:method] == :post
+        assert to_string(req.url) =~ "whatsapp/send"
+        body = req.options[:json]
+        assert body["instance_id"] == "instance-1"
+        assert body["payload"]["message"] == "Hello"
+        Req.Response.new(status: 200, body: %{"message_ids" => ["msg-123"], "status" => "queued"})
+      end
+
+      {:ok, response} = Zenvio.Whatsapp.send_text(client, "instance-1", "5511999999999", "Hello", adapter: adapter)
+      assert response["message_ids"] == ["msg-123"]
+      assert response["status"] == "queued"
     end
 
-    {:ok, response} = Zenvio.Whatsapp.send_text(client, "phone-123", "5511999999999", "Text", adapter: adapter)
-    assert response["success"] == true
-  end
+    test "send_text error returns status and body", %{client: client} do
+      adapter = fn _req ->
+        Req.Response.new(status: 400, body: %{"error" => "Invalid instance"})
+      end
 
-  test "send_image success", %{client: client} do
-    adapter = fn %Req.Request{} = req ->
-      assert req.body =~ "image"
-      Req.Response.new(status: 200, body: %{"success" => true})
+      assert {:error, %{status: 400, body: body}} = Zenvio.Whatsapp.send_text(client, "x", "1", "hi", adapter: adapter)
+      assert body["error"] == "Invalid instance"
     end
 
-    {:ok, response} = Zenvio.Whatsapp.send_image(client, "p", "123", "http://i.png", "Cap", adapter: adapter)
-    assert response["success"] == true
+    test "send with params", %{client: client} do
+      adapter = fn _req -> Req.Response.new(status: 200, body: %{"message_ids" => ["m1"], "status" => "queued"}) end
+
+      params = %{
+        "to" => ["5511888888888"],
+        "type" => "text",
+        "payload" => %{"message" => "Hi"}
+      }
+
+      {:ok, resp} = Zenvio.Whatsapp.send(client, "instance-1", params, adapter: adapter)
+      assert resp["message_ids"] == ["m1"]
+    end
+
+    test "get_message", %{client: client} do
+      adapter = fn %Req.Request{} = req ->
+        assert to_string(req.url) =~ "whatsapp/msg-1"
+        Req.Response.new(status: 200, body: %{"message_id" => "msg-1", "status" => "delivered"})
+      end
+
+      {:ok, status} = Zenvio.Whatsapp.get_message(client, "msg-1", adapter: adapter)
+      assert status["message_id"] == "msg-1"
+      assert status["status"] == "delivered"
+    end
+
+    test "list_instances", %{client: client} do
+      adapter = fn _req -> Req.Response.new(status: 200, body: %{"success" => true, "data" => [], "pagination" => %{}}) end
+      {:ok, list} = Zenvio.Whatsapp.list_instances(client, %{}, adapter: adapter)
+      assert list["success"] == true
+    end
   end
 
-  test "send generic template", %{client: client} do
-    adapter = fn _req -> Req.Response.new(status: 200, body: %{"success" => true}) end
+  describe "SMS" do
+    test "send", %{client: client} do
+      adapter = fn %Req.Request{} = req ->
+        assert to_string(req.url) =~ "sms/send"
+        assert req.options[:json]["to"] == ["5511999999999"]
+        Req.Response.new(status: 200, body: %{"success" => true, "data" => %{"sms_ids" => ["sms-1"], "status" => "queued"}})
+      end
 
-    params = %{
-      "to" => ["123"],
-      "type" => "template",
-      "payload" => %{"key" => "k", "language" => "en"}
-    }
-    {:ok, response} = Zenvio.Whatsapp.send(client, "p", params, adapter: adapter)
-    assert response["success"] == true
+      {:ok, resp} = Zenvio.Sms.send(client, %{"to" => ["5511999999999"], "message" => "Test"}, adapter: adapter)
+      assert resp["data"]["sms_ids"] == ["sms-1"]
+    end
+
+    test "get", %{client: client} do
+      adapter = fn _req -> Req.Response.new(status: 200, body: %{"success" => true, "data" => %{"sms_id" => "sms-1", "status" => "delivered"}}) end
+      {:ok, resp} = Zenvio.Sms.get(client, "sms-1", adapter: adapter)
+      assert resp["data"]["sms_id"] == "sms-1"
+    end
   end
 
-  test "api error handling", %{client: client} do
-    adapter = fn _req -> Req.Response.new(status: 400, body: %{"error" => "Bad Request"}) end
-    assert {:error, "Bad Request"} = Zenvio.Whatsapp.send_text(client, "p", "1", "hi", adapter: adapter)
+  describe "Email" do
+    test "send", %{client: client} do
+      adapter = fn _req ->
+        Req.Response.new(status: 200, body: %{"success" => true, "data" => %{"email_ids" => ["email-1"], "status" => "queued"}})
+      end
+
+      params = %{"from" => "noreply@example.com", "to" => ["u@example.com"], "subject" => "Test", "text" => "Body"}
+      {:ok, resp} = Zenvio.Email.send(client, params, adapter: adapter)
+      assert resp["data"]["email_ids"] == ["email-1"]
+    end
+
+    test "cancel", %{client: client} do
+      adapter = fn _req -> Req.Response.new(status: 200, body: %{"success" => true, "data" => %{"email_id" => "email-1", "status" => "cancelled"}}) end
+      {:ok, resp} = Zenvio.Email.cancel(client, "email-1", adapter: adapter)
+      assert resp["success"] == true
+    end
+  end
+
+  describe "Messages" do
+    test "send", %{client: client} do
+      adapter = fn %Req.Request{} = req ->
+        assert to_string(req.url) =~ "templates/send"
+        body = req.options[:json]
+        assert body["template"] == "welcome"
+        assert body["channels"] == ["whatsapp", "sms"]
+        Req.Response.new(status: 200, body: %{"success" => true, "data" => %{"message_ids" => ["m1", "m2"], "status" => "queued"}})
+      end
+
+      params = %{
+        "to" => ["5511999999999"],
+        "template" => "welcome",
+        "variables" => %{"name" => "User"},
+        "channels" => ["whatsapp", "sms"],
+        "instance_id" => "inst-1"
+      }
+
+      {:ok, resp} = Zenvio.Messages.send(client, params, adapter: adapter)
+      assert resp["data"]["message_ids"] == ["m1", "m2"]
+    end
   end
 end

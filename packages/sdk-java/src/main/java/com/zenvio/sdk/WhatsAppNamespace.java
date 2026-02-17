@@ -1,12 +1,15 @@
 package com.zenvio.sdk;
 
-import com.zenvio.sdk.model.Payloads;
-import com.zenvio.sdk.model.SendParams;
-import com.zenvio.sdk.model.SendResponse;
+import com.zenvio.sdk.model.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+/**
+ * POST/GET/DELETE/PATCH /v1/whatsapp/... e /v1/whatsapp/instances/...
+ */
 public class WhatsAppNamespace {
     private final Zenvio client;
 
@@ -14,40 +17,71 @@ public class WhatsAppNamespace {
         this.client = client;
     }
 
-    /**
-     * Sends a WhatsApp message
-     * 
-     * @param phoneId The ID of the phone instance to send from
-     * @param params  Message parameters
-     * @return SendResponse
-     */
-    public SendResponse send(String phoneId, SendParams params) {
-        String path = "/whatsapp/" + phoneId + "/messages";
-        return client.request("POST", path, params);
+    /** POST /v1/whatsapp/send — instance_id no body */
+    public WhatsAppSendResponse send(String instanceId, WhatsAppSendParams params) {
+        params.setInstanceId(instanceId);
+        return client.request("POST", "/whatsapp/send", params, WhatsAppSendResponse.class);
     }
 
-    /**
-     * Shortcut to send a simple WhatsApp text message
-     * 
-     * @param phoneId The ID of the phone instance
-     * @param to      Recipient phone number
-     * @param text    The text message content
-     * @return SendResponse
-     */
-    public SendResponse sendText(String phoneId, String to, String text) {
-        return sendText(phoneId, Collections.singletonList(to), text);
+    /** Atalho: texto (payload.message) */
+    public WhatsAppSendResponse sendText(String instanceId, String to, String text) {
+        return sendText(instanceId, Collections.singletonList(to), text);
     }
 
-    /**
-     * Shortcut to send a simple WhatsApp text message to multiple recipients
-     * 
-     * @param phoneId The ID of the phone instance
-     * @param to      List of recipient phone numbers
-     * @param text    The text message content
-     * @return SendResponse
-     */
-    public SendResponse sendText(String phoneId, List<String> to, String text) {
-        SendParams params = new SendParams(to, "text", new Payloads.Text(text));
-        return send(phoneId, params);
+    public WhatsAppSendResponse sendText(String instanceId, List<String> to, String text) {
+        WhatsAppSendParams params = new WhatsAppSendParams();
+        params.setInstanceId(instanceId);
+        params.setTo(to);
+        params.setType("text");
+        params.setPayload(new WhatsAppPayloads.TextPayload(text));
+        return client.request("POST", "/whatsapp/send", params, WhatsAppSendResponse.class);
+    }
+
+    public WhatsAppMessageStatus getMessage(String messageId) {
+        return client.request("GET", "/whatsapp/" + messageId, null, WhatsAppMessageStatus.class);
+    }
+
+    public WhatsAppMessageActionResponse deleteMessage(String messageId) {
+        return client.request("DELETE", "/whatsapp/" + messageId, null, WhatsAppMessageActionResponse.class);
+    }
+
+    public WhatsAppMessageActionResponse editMessage(String messageId, String text) {
+        return client.request("PATCH", "/whatsapp/" + messageId + "/edit",
+                Map.of("text", text), WhatsAppMessageActionResponse.class);
+    }
+
+    public WhatsAppMessageActionResponse cancelMessage(String messageId) {
+        return client.request("POST", "/whatsapp/" + messageId + "/cancel", null, WhatsAppMessageActionResponse.class);
+    }
+
+    public WhatsAppInstanceListResponse listInstances() {
+        return listInstances(null);
+    }
+
+    public WhatsAppInstanceListResponse listInstances(Map<String, String> params) {
+        String path = "/whatsapp/instances";
+        if (params != null && !params.isEmpty()) {
+            String q = params.entrySet().stream()
+                    .map(e -> e.getKey() + "=" + java.net.URLEncoder.encode(e.getValue(), java.nio.charset.StandardCharsets.UTF_8))
+                    .collect(Collectors.joining("&"));
+            path = path + "?" + q;
+        }
+        return client.request("GET", path, null, WhatsAppInstanceListResponse.class);
+    }
+
+    public WhatsAppInstanceResponse getInstance(String instanceId) {
+        return client.request("GET", "/whatsapp/instances/" + instanceId, null, WhatsAppInstanceResponse.class);
+    }
+
+    public WhatsAppCreateInstanceResponse createInstance(String name) {
+        return client.request("POST", "/whatsapp/instances", Map.of("name", name), WhatsAppCreateInstanceResponse.class);
+    }
+
+    public WhatsAppInstanceActionResponse disconnectInstance(String instanceId) {
+        return client.request("POST", "/whatsapp/instances/" + instanceId + "/disconnect", null, WhatsAppInstanceActionResponse.class);
+    }
+
+    public WhatsAppInstanceActionResponse deleteInstance(String instanceId) {
+        return client.request("DELETE", "/whatsapp/instances/" + instanceId, null, WhatsAppInstanceActionResponse.class);
     }
 }

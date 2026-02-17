@@ -1,149 +1,235 @@
+"""Testes do SDK Python — alinhados à API v1."""
+
 import pytest
+import requests
 import requests_mock
 from zenvio import Zenvio
 
-def test_send_text_shortcut():
+
+# ----- WhatsApp -----
+
+def test_whatsapp_send_uses_post_whatsapp_send_with_instance_id_in_body():
     with requests_mock.Mocker() as m:
-        phone_id = "phone-123"
-        api_key = "test-key"
         m.post(
-            f"https://api.zenvio.com/v1/whatsapp/{phone_id}/messages",
-            json={"success": True, "messageId": "msg-999"},
-            status_code=200
+            "https://api.zenvio.com/v1/whatsapp/send",
+            json={"message_ids": ["msg-1"], "status": "queued"},
+            status_code=202,
         )
-
-        client = Zenvio(api_key=api_key)
-        response = client.whatsapp.send_text(phone_id, "5511999999999", "Hello Python!")
-
-        assert response["success"] is True
-        assert response["messageId"] == "msg-999"
-        
-        # Verify request headers and body
-        last_request = m.request_history[0]
-        assert last_request.headers["Authorization"] == f"Bearer {api_key}"
-        assert last_request.json()["type"] == "text"
-        assert last_request.json()["payload"]["text"] == "Hello Python!"
-
-def test_send_full_params():
-    with requests_mock.Mocker() as m:
-        phone_id = "phone-123"
-        m.post(
-            f"https://api.zenvio.com/v1/whatsapp/{phone_id}/messages",
-            json={"success": True, "messageId": "msg-template"},
-            status_code=200
-        )
-
         client = Zenvio(api_key="test-key")
-        params = {
-            "to": ["5511999999999"],
-            "type": "template",
-            "payload": {
-                "key": "welcome",
-                "language": "pt_BR",
-                "variables": ["Matheus"]
-            }
-        }
-        response = client.whatsapp.send(phone_id, params)
+        result = client.whatsapp.send(
+            "instance-abc",
+            {
+                "to": ["5511999999999"],
+                "type": "text",
+                "payload": {"message": "Hello"},
+            },
+        )
+        assert result["message_ids"] == ["msg-1"]
+        assert result["status"] == "queued"
+        body = m.request_history[0].json()
+        assert body["instance_id"] == "instance-abc"
+        assert body["payload"]["message"] == "Hello"
 
-        assert response["success"] is True
-        last_body = m.request_history[0].json()
-        assert last_body["type"] == "template"
-        assert last_body["payload"]["key"] == "welcome"
 
-def test_api_error_handling():
+def test_whatsapp_send_text():
     with requests_mock.Mocker() as m:
-        phone_id = "phone-123"
         m.post(
-            f"https://api.zenvio.com/v1/whatsapp/{phone_id}/messages",
+            "https://api.zenvio.com/v1/whatsapp/send",
+            json={"message_ids": ["m1"], "status": "queued"},
+            status_code=202,
+        )
+        client = Zenvio(api_key="test-key")
+        result = client.whatsapp.send_text("inst-1", "5511999999999", "Hi")
+        assert result["status"] == "queued"
+        body = m.request_history[0].json()
+        assert body["payload"]["message"] == "Hi"
+        assert body["to"] == ["5511999999999"]
+
+
+def test_whatsapp_get_message():
+    with requests_mock.Mocker() as m:
+        m.get(
+            "https://api.zenvio.com/v1/whatsapp/msg-1",
+            json={
+                "message_id": "msg-1",
+                "to": "5511999999999",
+                "type": "text",
+                "status": "sent",
+                "created_at": "2025-01-01T12:00:00Z",
+            },
+        )
+        client = Zenvio(api_key="test-key")
+        result = client.whatsapp.get_message("msg-1")
+        assert result["message_id"] == "msg-1"
+        assert result["status"] == "sent"
+
+
+def test_whatsapp_delete_and_cancel():
+    with requests_mock.Mocker() as m:
+        m.delete(
+            "https://api.zenvio.com/v1/whatsapp/msg-1",
+            json={"success": True, "message_ids": ["msg-1"], "status": "deleted"},
+        )
+        m.post(
+            "https://api.zenvio.com/v1/whatsapp/msg-2/cancel",
+            json={"success": True, "message_ids": ["msg-2"], "status": "cancelled"},
+        )
+        client = Zenvio(api_key="test-key")
+        r1 = client.whatsapp.delete_message("msg-1")
+        assert r1["status"] == "deleted"
+        r2 = client.whatsapp.cancel_message("msg-2")
+        assert r2["status"] == "cancelled"
+
+
+def test_whatsapp_instances_list_and_get():
+    with requests_mock.Mocker() as m:
+        m.get(
+            "https://api.zenvio.com/v1/whatsapp/instances",
+            json={
+                "success": True,
+                "data": [{"id": "i1", "name": "My", "status": "ACTIVE"}],
+                "pagination": {"total": 1, "page": 1, "limit": 10, "totalPages": 1},
+            },
+        )
+        m.get(
+            "https://api.zenvio.com/v1/whatsapp/instances/i1",
+            json={"success": True, "data": {"id": "i1", "name": "My", "status": "ACTIVE"}},
+        )
+        client = Zenvio(api_key="test-key")
+        list_res = client.whatsapp.list_instances()
+        assert len(list_res["data"]) == 1
+        get_res = client.whatsapp.get_instance("i1")
+        assert get_res["data"]["id"] == "i1"
+
+
+# ----- SMS -----
+
+def test_sms_send():
+    with requests_mock.Mocker() as m:
+        m.post(
+            "https://api.zenvio.com/v1/sms/send",
+            json={
+                "success": True,
+                "data": {"status": "queued", "count": 1, "sms_ids": ["sms-1"]},
+            },
+            status_code=202,
+        )
+        client = Zenvio(api_key="test-key")
+        result = client.sms.send({"to": ["5511999999999"], "message": "Olá!"})
+        assert result["success"] is True
+        assert result["data"]["sms_ids"] == ["sms-1"]
+        assert m.request_history[0].json()["message"] == "Olá!"
+
+
+def test_sms_get():
+    with requests_mock.Mocker() as m:
+        m.get(
+            "https://api.zenvio.com/v1/sms/sms-1",
+            json={
+                "success": True,
+                "data": {
+                    "sms_id": "sms-1",
+                    "to": "5511999999999",
+                    "status": "DELIVERED",
+                    "created_at": "2025-01-01T12:00:00Z",
+                },
+            },
+        )
+        client = Zenvio(api_key="test-key")
+        result = client.sms.get("sms-1")
+        assert result["data"]["sms_id"] == "sms-1"
+        assert result["data"]["status"] == "DELIVERED"
+
+
+# ----- Email -----
+
+def test_email_send():
+    with requests_mock.Mocker() as m:
+        m.post(
+            "https://api.zenvio.com/v1/email/send",
+            json={
+                "success": True,
+                "data": {"email_ids": ["em-1"], "status": "queued", "count": 1},
+            },
+            status_code=202,
+        )
+        client = Zenvio(api_key="test-key")
+        result = client.email.send({
+            "from_address": "noreply@example.com",
+            "to": ["user@example.com"],
+            "subject": "Test",
+            "html": "<p>Hi</p>",
+        })
+        assert result["data"]["email_ids"] == ["em-1"]
+        body = m.request_history[0].json()
+        assert body["from"] == "noreply@example.com"
+
+
+def test_email_get_and_cancel():
+    with requests_mock.Mocker() as m:
+        m.get(
+            "https://api.zenvio.com/v1/email/em-1",
+            json={
+                "success": True,
+                "data": {"id": "em-1", "status": "SENT", "to": "u@x.com"},
+            },
+        )
+        m.post(
+            "https://api.zenvio.com/v1/email/em-1/cancel",
+            json={"success": True, "data": {"email_id": "em-1", "status": "cancelled"}},
+        )
+        client = Zenvio(api_key="test-key")
+        r1 = client.email.get("em-1")
+        assert r1["data"]["id"] == "em-1"
+        r2 = client.email.cancel("em-1")
+        assert r2["data"]["status"] == "cancelled"
+
+
+# ----- Messages (template) -----
+
+def test_messages_send():
+    with requests_mock.Mocker() as m:
+        m.post(
+            "https://api.zenvio.com/v1/templates/send",
+            json={
+                "success": True,
+                "data": {
+                    "message_ids": ["msg-1"],
+                    "sms_ids": ["sms-1"],
+                    "email_ids": ["em-1"],
+                    "status": "queued",
+                    "count": 3,
+                },
+            },
+            status_code=202,
+        )
+        client = Zenvio(api_key="test-key")
+        result = client.messages.send({
+            "to": ["5511999999999", "user@example.com"],
+            "template": "welcome",
+            "variables": {"name": "Trial", "credits": 300},
+            "channels": ["whatsapp", "sms", "email"],
+            "instance_id": "inst-1",
+            "from_address": "noreply@example.com",
+        })
+        assert result["data"]["status"] == "queued"
+        assert result["data"]["count"] == 3
+        body = m.request_history[0].json()
+        assert body["template"] == "welcome"
+        assert body["channels"] == ["whatsapp", "sms", "email"]
+        assert body["from"] == "noreply@example.com"
+
+
+# ----- Errors -----
+
+def test_api_error_raises():
+    with requests_mock.Mocker() as m:
+        m.post(
+            "https://api.zenvio.com/v1/whatsapp/send",
             json={"message": "Invalid API Key", "success": False},
-            status_code=403
+            status_code=401,
         )
-
         client = Zenvio(api_key="wrong-key")
-        response = client.whatsapp.send_text(phone_id, "123", "hi")
-
-        assert response["success"] is False
-        assert response["error"] == "Invalid API Key"
-
-def test_send_image():
-    with requests_mock.Mocker() as m:
-        phone_id = "phone-123"
-        m.post(
-            f"https://api.zenvio.com/v1/whatsapp/{phone_id}/messages",
-            json={"success": True, "messageId": "msg-img"},
-            status_code=200
-        )
-
-        client = Zenvio(api_key="test-key")
-        payload = {
-            "url": "https://example.com/test.jpg",
-            "caption": "Test Image"
-        }
-        response = client.whatsapp.send(phone_id, {
-            "to": ["5511999999999"],
-            "type": "image",
-            "payload": payload
-        })
-
-        assert response["success"] is True
-        assert m.request_history[0].json()["payload"]["url"] == "https://example.com/test.jpg"
-
-def test_send_buttons():
-    with requests_mock.Mocker() as m:
-        phone_id = "phone-123"
-        m.post(
-            f"https://api.zenvio.com/v1/whatsapp/{phone_id}/messages",
-            json={"success": True, "messageId": "msg-btn"},
-            status_code=200
-        )
-
-        client = Zenvio(api_key="test-key")
-        response = client.whatsapp.send(phone_id, {
-            "to": ["5511999999999"],
-            "type": "buttons",
-            "payload": {
-                "body": "Hi",
-                "buttons": [{"id": "1", "label": "Opt 1"}]
-            }
-        })
-
-        assert response["success"] is True
-        assert m.request_history[0].json()["type"] == "buttons"
-
-def test_send_media_variants():
-    with requests_mock.Mocker() as m:
-        phone_id = "phone-123"
-        m.post(f"https://api.zenvio.com/v1/whatsapp/{phone_id}/messages", json={"success": True})
-
-        client = Zenvio(api_key="test-key")
-        
-        # Audio
-        client.whatsapp.send(phone_id, {"to": ["1"], "type": "audio", "payload": {"url": "a.mp3"}})
-        assert m.request_history[-1].json()["type"] == "audio"
-
-        # Document
-        client.whatsapp.send(phone_id, {"to": ["1"], "type": "document", "payload": {"url": "d.pdf"}})
-        assert m.request_history[-1].json()["type"] == "document"
-
-        # Video
-        client.whatsapp.send(phone_id, {"to": ["1"], "type": "video", "payload": {"url": "v.mp4"}})
-        assert m.request_history[-1].json()["type"] == "video"
-
-def test_send_list():
-    with requests_mock.Mocker() as m:
-        phone_id = "p-1"
-        m.post(f"https://api.zenvio.com/v1/whatsapp/{phone_id}/messages", json={"success": True})
-        
-        client = Zenvio(api_key="k")
-        response = client.whatsapp.send(phone_id, {
-            "to": ["1"],
-            "type": "list",
-            "payload": {
-                "body": "Select",
-                "sections": [{"title": "S1", "rows": [{"id": "r1", "title": "Row 1"}]}]
-            }
-        })
-        
-        assert response["success"] is True
-        assert m.request_history[0].json()["type"] == "list"
-        assert m.request_history[0].json()["payload"]["body"] == "Select"
+        with pytest.raises(requests.HTTPError) as exc_info:
+            client.whatsapp.send("inst", {"to": ["1"], "type": "text", "payload": {"message": "x"}})
+        assert exc_info.value.response.status_code == 401
