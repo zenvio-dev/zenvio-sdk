@@ -1,6 +1,6 @@
 defmodule Zenvio.Sms do
   @moduledoc """
-  SMS — POST /v1/sms/send, GET /v1/sms/:id
+  SMS — POST /v1/sms/send, GET /v1/sms/:id, POST /v1/sms/:id/cancel
   """
 
   @doc """
@@ -14,5 +14,10 @@ defmodule Zenvio.Sms do
   @doc "GET /v1/sms/:id"
   def get(client, id, opts \\ []) do
     Zenvio.request(client, :get, "/sms/#{id}", nil, opts)
+  end
+
+  @doc "POST /v1/sms/:id/cancel — cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel."
+  def cancel(client, id, opts \\ []) do
+    Zenvio.request(client, :post, "/sms/#{id}/cancel", nil, opts)
   end
 end

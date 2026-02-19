@@ -14,6 +14,7 @@ import type {
   SmsSendParams,
   SmsSendResponse,
   SmsStatusResponse,
+  SmsCancelResponse,
   EmailSendParams,
   EmailSendResponse,
   EmailStatusResponse,
@@ -220,7 +221,7 @@ export class Zenvio {
   };
 
   /**
-   * SMS API — POST /v1/sms/send, GET /v1/sms/:id
+   * SMS API — POST /v1/sms/send, GET /v1/sms/:id, POST /v1/sms/:id/cancel
    */
   public sms = {
     /**
@@ -236,6 +237,14 @@ export class Zenvio {
      */
     get: async (id: string): Promise<SmsStatusResponse> => {
       const response = await this.client.get<SmsStatusResponse>(`/sms/${id}`);
+      return response.data;
+    },
+
+    /**
+     * POST /v1/sms/:id/cancel — Cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel.
+     */
+    cancel: async (id: string): Promise<SmsCancelResponse> => {
+      const response = await this.client.post<SmsCancelResponse>(`/sms/${id}/cancel`);
       return response.data;
     },
   };

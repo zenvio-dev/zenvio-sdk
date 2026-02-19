@@ -16,8 +16,10 @@ app.post('/v1/whatsapp/send', (req, res) => {
     return res.status(400).json({ success: false, error: 'Text payload requires message field' });
   }
 
-  if (['image', 'video', 'audio', 'document'].includes(type) && !payload.media_url) {
-    return res.status(400).json({ success: false, error: `${type} requires payload.media_url` });
+  if (['image', 'video', 'audio', 'document'].includes(type)) {
+    if (!payload.media_url) return res.status(400).json({ success: false, error: `${type} requires payload.media_url` });
+    if (!payload.file_name) return res.status(400).json({ success: false, error: `${type} requires payload.file_name` });
+    if (!payload.mimetype) return res.status(400).json({ success: false, error: `${type} requires payload.mimetype` });
   }
 
   res.status(202).json({

@@ -158,6 +158,30 @@ func TestSmsGet(t *testing.T) {
 	}
 }
 
+func TestSmsCancel(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/sms/sms-1/cancel" {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		r2 := SmsCancelResponse{Success: true}
+		r2.Data.SmsID = "sms-1"
+		r2.Data.Status = "cancelled"
+		json.NewEncoder(w).Encode(r2)
+	}))
+	defer server.Close()
+
+	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	resp, err := client.SMS.Cancel("sms-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !resp.Success || resp.Data.SmsID != "sms-1" {
+		t.Errorf("unexpected: %+v", resp)
+	}
+}
+
 func TestEmailSend(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

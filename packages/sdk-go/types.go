@@ -7,15 +7,35 @@ type WhatsAppTextPayload struct {
 	Message string `json:"message"`
 }
 
-// WhatsAppMediaPayload — tipo image, video, audio, document: payload.media_url
+// WhatsAppMediaPayload — tipo image, video, audio, document: media_url, file_name e mimetype obrigatórios
 type WhatsAppMediaPayload struct {
-	MediaURL string `json:"media_url"`
+	MediaURL  string `json:"media_url"`
+	FileName  string `json:"file_name"`
+	Mimetype  string `json:"mimetype"`
 }
 
-// WhatsAppLocationPayload — tipo location
+// WhatsAppLocationPayload — tipo location (latitude, longitude, name e address obrigatórios)
 type WhatsAppLocationPayload struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+	Name      string  `json:"name"`
+	Address   string  `json:"address"`
+}
+
+// WhatsAppContactPayload — tipo contact: fullName e wuid ou phoneNumber obrigatórios
+type WhatsAppContactPayload struct {
+	FullName     string `json:"fullName"`
+	Wuid         string `json:"wuid,omitempty"`         // Número só dígitos com DDI
+	PhoneNumber  string `json:"phoneNumber,omitempty"` // Formatado, ex: +55 28 99999-9999
+	Organization string `json:"organization,omitempty"`
+	Email        string `json:"email,omitempty"`
+	URL          string `json:"url,omitempty"`
+}
+
+// WhatsAppContactMessagePayload — payload para type=contact: contact (objeto) ou contact_id (ID do workspace)
+type WhatsAppContactMessagePayload struct {
+	Contact   *WhatsAppContactPayload `json:"contact,omitempty"`
+	ContactID string                  `json:"contact_id,omitempty"`
 }
 
 // WhatsAppSendParams — body para POST /v1/whatsapp/send
@@ -157,6 +177,15 @@ type SmsStatusResponse struct {
 	} `json:"data"`
 }
 
+// SmsCancelResponse — POST /v1/sms/:id/cancel
+type SmsCancelResponse struct {
+	Success bool `json:"success"`
+	Data    struct {
+		SmsID   string `json:"sms_id"`
+		Status  string `json:"status"`
+	} `json:"data"`
+}
+
 // ========== Email — POST /v1/email/send, GET /v1/email/:id, POST /v1/email/:id/cancel ==========
 
 // EmailSendParams — body para POST /v1/email/send (campo "from" na API)
@@ -216,6 +245,7 @@ type EmailCancelResponse struct {
 }
 
 // ========== Messages (templates) — POST /v1/templates/send ==========
+// Mesmos campos em todos os SDKs: to, template, variables, channels, instance_id, from, fromName.
 
 // MessagesSendParams — body para POST /v1/templates/send
 type MessagesSendParams struct {
@@ -225,7 +255,7 @@ type MessagesSendParams struct {
 	Channels   []string               `json:"channels"` // whatsapp, sms, email
 	InstanceID string                 `json:"instance_id,omitempty"`
 	From       string                 `json:"from,omitempty"`
-	FromName   string                 `json:"from_name,omitempty"`
+	FromName   string                 `json:"fromName,omitempty"`
 }
 
 // MessagesSendResponse — resposta do templates/send

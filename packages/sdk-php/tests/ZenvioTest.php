@@ -100,6 +100,19 @@ class ZenvioTest extends TestCase
         $this->assertSame('sms-1', $resp['data']['sms_id']);
     }
 
+    public function testSmsCancel(): void
+    {
+        $zenvio = $this->getMockClient([
+            new Response(200, [], json_encode([
+                'success' => true,
+                'data' => ['sms_id' => 'sms-1', 'status' => 'cancelled'],
+            ])),
+        ]);
+        $resp = $zenvio->sms->cancel('sms-1');
+        $this->assertTrue($resp['success']);
+        $this->assertSame('cancelled', $resp['data']['status']);
+    }
+
     public function testEmailSend(): void
     {
         $zenvio = $this->getMockClient([

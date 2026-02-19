@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
 
-/** Body para POST /v1/templates/send — envio por template (whatsapp, sms, email). */
+/** Body para POST /v1/templates/send — envio por template (whatsapp, sms, email). Mesmos campos em todos os SDKs: to, template, variables, channels, instance_id, from, fromName. */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MessagesSendParams {
     private List<String> to;
@@ -35,6 +35,8 @@ public class MessagesSendParams {
     @JsonProperty("from")
     public void setFrom(String from) { this.from = from; }
 
+    @JsonProperty("fromName")
     public String getFromName() { return fromName; }
+    @JsonProperty("fromName")
     public void setFromName(String fromName) { this.fromName = fromName; }
 }

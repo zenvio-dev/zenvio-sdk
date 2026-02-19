@@ -16,6 +16,7 @@ class Whatsapp
 
     /**
      * POST /v1/whatsapp/send — instance_id no body
+     * Tipos: text (payload.message), image|video|audio|document (payload.media_url, file_name, mimetype — todos obrigatórios), location (payload.latitude, longitude, name, address), contact (payload.contact com fullName, wuid/phoneNumber e opcionalmente organization, email, url; ou payload.contact_id = ID do contato do workspace)
      * @param array{to: list<string>, type: string, payload: array, schedule?: array, options?: array} $params
      */
     public function send(string $instanceId, array $params): array

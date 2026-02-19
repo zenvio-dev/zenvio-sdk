@@ -84,7 +84,7 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
     );
   });
 
-  it('sends image with payload.media_url', async () => {
+  it('sends image with payload.media_url, file_name, mimetype', async () => {
     mockPost.mockResolvedValueOnce({
       data: { message_ids: ['img-1'], status: 'queued' },
     });
@@ -92,28 +92,28 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
     await zenvio.whatsapp.send('inst-1', {
       to: ['5511999999999'],
       type: 'image',
-      payload: { media_url: 'https://example.com/image.png' },
+      payload: { media_url: 'https://example.com/image.png', file_name: 'image.png', mimetype: 'image/png' },
     });
 
     expect(mockPost).toHaveBeenCalledWith(
       '/whatsapp/send',
       expect.objectContaining({
         type: 'image',
-        payload: { media_url: 'https://example.com/image.png' },
+        payload: { media_url: 'https://example.com/image.png', file_name: 'image.png', mimetype: 'image/png' },
       })
     );
   });
 
-  it('sends video, audio, document with media_url', async () => {
+  it('sends video, audio, document with media_url, file_name, mimetype', async () => {
     mockPost.mockResolvedValue({ data: { message_ids: ['x'], status: 'queued' } });
 
-    await zenvio.whatsapp.send('p', { to: ['1'], type: 'video', payload: { media_url: 'https://v.mp4' } });
-    expect(mockPost).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ type: 'video', payload: { media_url: 'https://v.mp4' } }));
+    await zenvio.whatsapp.send('p', { to: ['1'], type: 'video', payload: { media_url: 'https://v.mp4', file_name: 'v.mp4', mimetype: 'video/mp4' } });
+    expect(mockPost).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ type: 'video', payload: { media_url: 'https://v.mp4', file_name: 'v.mp4', mimetype: 'video/mp4' } }));
 
-    await zenvio.whatsapp.send('p', { to: ['1'], type: 'audio', payload: { media_url: 'https://a.mp3' } });
+    await zenvio.whatsapp.send('p', { to: ['1'], type: 'audio', payload: { media_url: 'https://a.mp3', file_name: 'a.mp3', mimetype: 'audio/mpeg' } });
     expect(mockPost).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ type: 'audio' }));
 
-    await zenvio.whatsapp.send('p', { to: ['1'], type: 'document', payload: { media_url: 'https://d.pdf' } });
+    await zenvio.whatsapp.send('p', { to: ['1'], type: 'document', payload: { media_url: 'https://d.pdf', file_name: 'd.pdf', mimetype: 'application/pdf' } });
     expect(mockPost).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ type: 'document' }));
   });
 
@@ -355,6 +355,22 @@ describe('Node.js SDK — SMS', () => {
     expect(mockGet).toHaveBeenCalledWith('/sms/sms-1');
     expect(result.data.sms_id).toBe('sms-1');
     expect(result.data.status).toBe('DELIVERED');
+  });
+
+  it('sms.cancel calls POST /sms/:id/cancel', async () => {
+    mockPost.mockResolvedValueOnce({
+      data: {
+        success: true,
+        data: { sms_id: 'sms-1', status: 'cancelled' },
+      },
+    });
+
+    const result = await zenvio.sms.cancel('sms-1');
+
+    expect(mockPost).toHaveBeenCalledWith('/sms/sms-1/cancel');
+    expect(result.success).toBe(true);
+    expect(result.data.sms_id).toBe('sms-1');
+    expect(result.data.status).toBe('cancelled');
   });
 });
 

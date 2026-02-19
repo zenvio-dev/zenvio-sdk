@@ -23,6 +23,7 @@ from .types import (
     EmailStatusResponse,
     MessagesSendParams,
     MessagesSendResponse,
+    SmsCancelResponse,
     SmsSendParams,
     SmsSendResponse,
     SmsStatusResponse,
@@ -128,7 +129,7 @@ class WhatsAppNamespace:
 
 
 class SmsNamespace:
-    """POST /v1/sms/send, GET /v1/sms/:id."""
+    """POST /v1/sms/send, GET /v1/sms/:id, POST /v1/sms/:id/cancel."""
 
     def __init__(self, client: "Zenvio") -> None:
         self._client = client
@@ -140,6 +141,10 @@ class SmsNamespace:
     def get(self, sms_id: str) -> SmsStatusResponse:
         """GET /v1/sms/:id — Status do SMS."""
         return self._client._request("GET", f"/sms/{sms_id}")
+
+    def cancel(self, sms_id: str) -> SmsCancelResponse:
+        """POST /v1/sms/:id/cancel — Cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel."""
+        return self._client._request("POST", f"/sms/{sms_id}/cancel")
 
 
 class EmailNamespace:

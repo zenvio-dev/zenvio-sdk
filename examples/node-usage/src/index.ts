@@ -36,7 +36,7 @@ async function main() {
     const imageRes = await zenvio.whatsapp.send(instanceId, {
       to: [myPhoneNumber],
       type: 'image',
-      payload: { media_url: 'https://placehold.co/600x400/png' },
+      payload: { media_url: 'https://placehold.co/600x400/png', file_name: 'image.png', mimetype: 'image/png' },
     });
     console.log('Result:', imageRes.message_ids);
 

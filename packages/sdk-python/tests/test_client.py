@@ -141,6 +141,23 @@ def test_sms_get():
         assert result["data"]["status"] == "DELIVERED"
 
 
+def test_sms_cancel():
+    with requests_mock.Mocker() as m:
+        m.post(
+            "https://api.zenvio.com/v1/sms/sms-1/cancel",
+            json={
+                "success": True,
+                "data": {"sms_id": "sms-1", "status": "cancelled"},
+            },
+            status_code=200,
+        )
+        client = Zenvio(api_key="test-key")
+        result = client.sms.cancel("sms-1")
+        assert result["success"] is True
+        assert result["data"]["sms_id"] == "sms-1"
+        assert result["data"]["status"] == "cancelled"
+
+
 # ----- Email -----
 
 def test_email_send():

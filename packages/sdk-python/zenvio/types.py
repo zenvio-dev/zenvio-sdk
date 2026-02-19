@@ -20,15 +20,31 @@ class TextPayload(TypedDict):
 
 class MediaPayload(TypedDict):
     media_url: str
+    file_name: str
+    mimetype: str
 
 
 class LocationPayload(TypedDict):
     latitude: float
     longitude: float
+    name: str
+    address: str
 
 
-class ContactPayload(TypedDict):
-    vcard: Union[str, Dict[str, Any]]
+class ContactPayload(TypedDict, total=False):
+    """Objeto de contato: fullName obrigatório; wuid ou phoneNumber obrigatório."""
+    fullName: str
+    wuid: str  # Número só dígitos com DDI
+    phoneNumber: str
+    organization: str
+    email: str
+    url: str
+
+
+# Payload para type=contact: payload.contact (objeto) ou payload.contact_id (ID do workspace)
+class ContactMessagePayload(TypedDict, total=False):
+    contact: ContactPayload
+    contact_id: str
 
 
 class WhatsAppSchedule(TypedDict, total=False):
@@ -45,7 +61,7 @@ class WhatsAppSendParams(TypedDict, total=False):
     instance_id: str
     to: List[str]
     type: WhatsAppMessageType
-    payload: Union[TextPayload, MediaPayload, LocationPayload, ContactPayload]
+    payload: Union[TextPayload, MediaPayload, LocationPayload, ContactMessagePayload]
     schedule: WhatsAppSchedule
     options: WhatsAppOptions
 
@@ -158,6 +174,11 @@ class SmsStatusResponse(TypedDict, total=False):
     data: SmsStatus
 
 
+class SmsCancelResponse(TypedDict, total=False):
+    success: bool
+    data: Dict[str, str]  # sms_id, status: "cancelled"
+
+
 # ---------------------------------------------------------------------------
 # Email
 # ---------------------------------------------------------------------------
@@ -221,13 +242,13 @@ TemplateChannel = Literal["whatsapp", "sms", "email"]
 
 
 class MessagesSendParams(TypedDict, total=False):
-    """Use 'from_address' para o remetente em canal email (enviado como 'from' na API)."""
+    """Mesmos parâmetros da API e dos outros SDKs: to, template, variables, channels, instance_id, from_address (→ from), fromName."""
     to: List[str]
     template: str
     variables: Dict[str, Union[str, int]]
     channels: List[TemplateChannel]
     instance_id: str
-    from_address: str
+    from_address: str  # enviado como 'from' na API
     fromName: str
 
 

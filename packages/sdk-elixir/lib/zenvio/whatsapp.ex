@@ -6,6 +6,7 @@ defmodule Zenvio.Whatsapp do
   @doc """
   POST /v1/whatsapp/send — instance_id no body.
   params: map com "to", "type", "payload" (e opcionalmente "schedule", "options").
+  Tipos: text (payload.message), image|video|audio|document (payload.media_url, file_name, mimetype — todos obrigatórios), location (payload.latitude, longitude, name, address), contact (payload.contact com fullName, wuid/phoneNumber e opcionalmente organization, email, url; ou payload.contact_id = ID do contato do workspace).
   """
   def send(client, instance_id, params, opts \\ []) do
     params = Map.put(params, "instance_id", instance_id)

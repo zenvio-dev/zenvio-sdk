@@ -17,12 +17,12 @@ def main():
     res = zenvio.whatsapp.send_text(instance_id, phone, "Olá do Python!")
     print("message_ids:", res.get("message_ids"), "status:", res.get("status"))
 
-    # WhatsApp: imagem (payload.media_url)
+    # WhatsApp: imagem (media_url, file_name, mimetype obrigatórios)
     print("\n2. WhatsApp imagem...")
     res = zenvio.whatsapp.send(instance_id, {
         "to": [phone],
         "type": "image",
-        "payload": {"media_url": "https://placehold.co/600x400/png"},
+        "payload": {"media_url": "https://placehold.co/600x400/png", "file_name": "image.png", "mimetype": "image/png"},
     })
     print("message_ids:", res.get("message_ids"))
 

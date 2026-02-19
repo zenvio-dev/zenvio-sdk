@@ -21,16 +21,37 @@ export interface TextPayload {
 
 export interface MediaPayload {
   media_url: string;
+  /** Nome do arquivo (obrigatório). */
+  file_name: string;
+  /** Mimetype (obrigatório), ex: application/pdf, image/png. */
+  mimetype: string;
 }
 
 export interface LocationPayload {
   latitude: number;
   longitude: number;
+  /** Nome do local (obrigatório). */
+  name: string;
+  /** Endereço do local (obrigatório). */
+  address: string;
 }
 
+/** Objeto de contato para envio. fullName obrigatório; wuid ou phoneNumber obrigatório. */
 export interface ContactPayload {
-  vcard: string | object;
+  fullName: string;
+  /** Número só dígitos com DDI (ex.: 5528999999999). */
+  wuid?: string;
+  /** Número formatado (ex.: +55 28 99999-9999). */
+  phoneNumber?: string;
+  organization?: string;
+  email?: string;
+  url?: string;
 }
+
+/** Payload para type=contact: objeto contact ou contact_id do workspace. */
+export type ContactMessagePayload =
+  | { contact: ContactPayload }
+  | { contact_id: string };
 
 export type WhatsAppPayloadByType = {
   text: TextPayload;
@@ -39,7 +60,7 @@ export type WhatsAppPayloadByType = {
   audio: MediaPayload;
   document: MediaPayload;
   location: LocationPayload;
-  contact: ContactPayload;
+  contact: ContactMessagePayload;
 };
 
 /* =====================================================
@@ -222,6 +243,14 @@ export interface SmsStatusResponse {
   data: SmsStatus;
 }
 
+export interface SmsCancelResponse {
+  success: boolean;
+  data: {
+    sms_id: string;
+    status: 'cancelled';
+  };
+}
+
 /* =====================================================
    Email API (POST /v1/email/send, GET /v1/email/:id, POST /v1/email/:id/cancel)
    ===================================================== */
@@ -290,6 +319,7 @@ export interface EmailCancelResponse {
 
 export type TemplateChannel = 'whatsapp' | 'sms' | 'email';
 
+/** Parâmetros iguais em todos os SDKs: to, template, variables?, channels, instance_id?, from?, fromName? */
 export interface MessagesSendParams {
   /** Destinatários: números E.164 (WhatsApp/SMS) e/ou e-mails (Email). Máx. 100. */
   to: string[];

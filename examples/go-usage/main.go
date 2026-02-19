@@ -40,14 +40,15 @@ func main() {
 		fmt.Printf("Result: Success=%v, MessageID=%s\n", resp2.Success, resp2.MessageID)
 	}
 
-	// 4. Image example
+	// 4. Image example (media_url, file_name, mimetype obrigatórios)
 	fmt.Println("\n3. Sending image...")
-	resp3, err := client.WhatsApp.Send(phoneID, zenvio.SendParams{
+	resp3, err := client.WhatsApp.Send(phoneID, zenvio.WhatsAppSendParams{
 		To:   []string{recipient},
-		Type: zenvio.TypeImage,
-		Payload: zenvio.MediaPayload{
-			URL:     "https://placehold.co/600x400/png",
-			Caption: "Generated Go Gopher image",
+		Type: "image",
+		Payload: zenvio.WhatsAppMediaPayload{
+			MediaURL: "https://placehold.co/600x400/png",
+			FileName: "image.png",
+			Mimetype: "image/png",
 		},
 	})
 	if err != nil {

@@ -247,6 +247,15 @@ func (s *SmsNamespace) Get(id string) (*SmsStatusResponse, error) {
 	return &res, nil
 }
 
+// Cancel POST /v1/sms/:id/cancel — cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel.
+func (s *SmsNamespace) Cancel(id string) (*SmsCancelResponse, error) {
+	var res SmsCancelResponse
+	if err := s.client.request("POST", "/sms/"+id+"/cancel", nil, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
 // --- EmailNamespace ---
 
 // EmailNamespace métodos Email: send, get, cancel.

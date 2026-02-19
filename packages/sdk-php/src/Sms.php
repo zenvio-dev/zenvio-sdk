@@ -3,7 +3,7 @@
 namespace Zenvio;
 
 /**
- * SMS — POST /v1/sms/send, GET /v1/sms/:id
+ * SMS — POST /v1/sms/send, GET /v1/sms/:id, POST /v1/sms/:id/cancel
  */
 class Sms
 {
@@ -27,5 +27,11 @@ class Sms
     public function get(string $id): array
     {
         return $this->client->request('GET', '/sms/' . $id, null);
+    }
+
+    /** POST /v1/sms/:id/cancel — cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel. */
+    public function cancel(string $id): array
+    {
+        return $this->client->request('POST', '/sms/' . $id . '/cancel', null);
     }
 }

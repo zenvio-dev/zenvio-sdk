@@ -126,6 +126,18 @@ class ZenvioTest {
         assertEquals("sms-1", status.getData().getSmsId());
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void testSmsCancel() throws Exception {
+        when(mockResponse.statusCode()).thenReturn(200);
+        when(mockResponse.body()).thenReturn("{\"success\": true, \"data\": {\"sms_id\": \"sms-1\", \"status\": \"cancelled\"}}");
+        doReturn(mockResponse).when(mockHttpClient).send(any(), any());
+
+        SmsCancelResponse res = zenvio.sms.cancel("sms-1");
+        assertTrue(res.isSuccess());
+        assertEquals("sms-1", res.getData().getSmsId());
+    }
+
     // --- Email ---
 
     @Test

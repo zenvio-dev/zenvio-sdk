@@ -84,6 +84,13 @@ defmodule ZenvioTest do
       {:ok, resp} = Zenvio.Sms.get(client, "sms-1", adapter: adapter)
       assert resp["data"]["sms_id"] == "sms-1"
     end
+
+    test "cancel", %{client: client} do
+      adapter = fn _req -> Req.Response.new(status: 200, body: %{"success" => true, "data" => %{"sms_id" => "sms-1", "status" => "cancelled"}}) end
+      {:ok, resp} = Zenvio.Sms.cancel(client, "sms-1", adapter: adapter)
+      assert resp["success"] == true
+      assert resp["data"]["status"] == "cancelled"
+    end
   end
 
   describe "Email" do

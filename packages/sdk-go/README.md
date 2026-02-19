@@ -51,7 +51,7 @@ params := zenvio.WhatsAppSendParams{
 	InstanceID: instanceID,
 	To:         []string{"5511999999999"},
 	Type:       "image",
-	Payload:    zenvio.WhatsAppMediaPayload{MediaURL: "https://exemplo.com/img.png"},
+	Payload:    zenvio.WhatsAppMediaPayload{MediaURL: "https://exemplo.com/img.png", FileName: "img.png", Mimetype: "image/png"},
 }
 resp, _ := client.WhatsApp.Send(instanceID, params)
 

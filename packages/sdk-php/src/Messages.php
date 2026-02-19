@@ -15,11 +15,17 @@ class Messages
     }
 
     /**
-     * POST /v1/templates/send — envio por template (whatsapp, sms, email)
-     * @param array{to: list<string>, template: string, variables?: array, channels: list<string>, instance_id?: string, from?: string, from_name?: string} $params
+     * POST /v1/templates/send — envio por template (whatsapp, sms, email).
+     * Parâmetros (mesmos da API): to, template, variables?, channels, instance_id?, from?, fromName?
+     *
+     * @param array{to: list<string>, template: string, variables?: array<string, string|int>, channels: list<string>, instance_id?: string, from?: string, fromName?: string} $params
      */
     public function send(array $params): array
     {
+        if (isset($params['from_name']) && !\array_key_exists('fromName', $params)) {
+            $params['fromName'] = $params['from_name'];
+            unset($params['from_name']);
+        }
         return $this->client->request('POST', '/templates/send', $params);
     }
 }
