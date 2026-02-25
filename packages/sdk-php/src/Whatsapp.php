@@ -3,7 +3,7 @@
 namespace Zenvio;
 
 /**
- * WhatsApp — POST /v1/whatsapp/send, GET/DELETE/PATCH/POST /v1/whatsapp/:id, /v1/whatsapp/instances/...
+ * WhatsApp — POST /v1/whatsapp/messages, GET/DELETE/PATCH/POST /v1/whatsapp/messages/:id, /v1/whatsapp/instances/...
  */
 class Whatsapp
 {
@@ -15,14 +15,14 @@ class Whatsapp
     }
 
     /**
-     * POST /v1/whatsapp/send — instance_id no body
+     * POST /v1/whatsapp/messages — instance_id no body
      * Tipos: text (payload.message), image|video|audio|document (payload.media_url, file_name, mimetype — todos obrigatórios), location (payload.latitude, longitude, name, address), contact (payload.contact com fullName, wuid/phoneNumber e opcionalmente organization, email, url; ou payload.contact_id = ID do contato do workspace)
      * @param array{to: list<string>, type: string, payload: array, schedule?: array, options?: array} $params
      */
     public function send(string $instanceId, array $params): array
     {
         $params['instance_id'] = $instanceId;
-        return $this->client->request('POST', '/whatsapp/send', $params);
+        return $this->client->request('POST', '/whatsapp/messages', $params);
     }
 
     /**
@@ -39,28 +39,28 @@ class Whatsapp
         ]);
     }
 
-    /** GET /v1/whatsapp/:messageId */
+    /** GET /v1/whatsapp/messages/:messageId */
     public function getMessage(string $messageId): array
     {
-        return $this->client->request('GET', '/whatsapp/' . $messageId, null);
+        return $this->client->request('GET', '/whatsapp/messages/' . $messageId, null);
     }
 
-    /** DELETE /v1/whatsapp/:messageId */
+    /** DELETE /v1/whatsapp/messages/:messageId */
     public function deleteMessage(string $messageId): array
     {
-        return $this->client->request('DELETE', '/whatsapp/' . $messageId, null);
+        return $this->client->request('DELETE', '/whatsapp/messages/' . $messageId, null);
     }
 
-    /** PATCH /v1/whatsapp/:messageId/edit */
+    /** PATCH /v1/whatsapp/messages/:messageId/edit */
     public function editMessage(string $messageId, string $text): array
     {
-        return $this->client->request('PATCH', '/whatsapp/' . $messageId . '/edit', ['text' => $text]);
+        return $this->client->request('PATCH', '/whatsapp/messages/' . $messageId . '/edit', ['text' => $text]);
     }
 
-    /** POST /v1/whatsapp/:messageId/cancel */
+    /** POST /v1/whatsapp/messages/:messageId/cancel */
     public function cancelMessage(string $messageId): array
     {
-        return $this->client->request('POST', '/whatsapp/' . $messageId . '/cancel', null);
+        return $this->client->request('POST', '/whatsapp/messages/' . $messageId . '/cancel', null);
     }
 
     /**

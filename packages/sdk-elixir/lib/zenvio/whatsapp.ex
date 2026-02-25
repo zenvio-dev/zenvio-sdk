@@ -1,16 +1,16 @@
 defmodule Zenvio.Whatsapp do
   @moduledoc """
-  WhatsApp — POST /v1/whatsapp/send, GET/DELETE/PATCH/POST /v1/whatsapp/:id, /v1/whatsapp/instances/...
+  WhatsApp — POST /v1/whatsapp/messages, GET/DELETE/PATCH/POST /v1/whatsapp/messages/:id, /v1/whatsapp/instances/...
   """
 
   @doc """
-  POST /v1/whatsapp/send — instance_id no body.
+  POST /v1/whatsapp/messages — instance_id no body.
   params: map com "to", "type", "payload" (e opcionalmente "schedule", "options").
   Tipos: text (payload.message), image|video|audio|document (payload.media_url, file_name, mimetype — todos obrigatórios), location (payload.latitude, longitude, name, address), contact (payload.contact com fullName, wuid/phoneNumber e opcionalmente organization, email, url; ou payload.contact_id = ID do contato do workspace).
   """
   def send(client, instance_id, params, opts \\ []) do
     params = Map.put(params, "instance_id", instance_id)
-    Zenvio.request(client, :post, "/whatsapp/send", params, opts)
+    Zenvio.request(client, :post, "/whatsapp/messages", params, opts)
   end
 
   @doc """
@@ -27,24 +27,24 @@ defmodule Zenvio.Whatsapp do
     send(client, instance_id, params, opts)
   end
 
-  @doc "GET /v1/whatsapp/:messageId"
+  @doc "GET /v1/whatsapp/messages/:messageId"
   def get_message(client, message_id, opts \\ []) do
-    Zenvio.request(client, :get, "/whatsapp/#{message_id}", nil, opts)
+    Zenvio.request(client, :get, "/whatsapp/messages/#{message_id}", nil, opts)
   end
 
-  @doc "DELETE /v1/whatsapp/:messageId"
+  @doc "DELETE /v1/whatsapp/messages/:messageId"
   def delete_message(client, message_id, opts \\ []) do
-    Zenvio.request(client, :delete, "/whatsapp/#{message_id}", nil, opts)
+    Zenvio.request(client, :delete, "/whatsapp/messages/#{message_id}", nil, opts)
   end
 
-  @doc "PATCH /v1/whatsapp/:messageId/edit — body: %{\"text\" => \"...\"}"
+  @doc "PATCH /v1/whatsapp/messages/:messageId/edit — body: %{\"text\" => \"...\"}"
   def edit_message(client, message_id, text, opts \\ []) do
-    Zenvio.request(client, :patch, "/whatsapp/#{message_id}/edit", %{"text" => text}, opts)
+    Zenvio.request(client, :patch, "/whatsapp/messages/#{message_id}/edit", %{"text" => text}, opts)
   end
 
-  @doc "POST /v1/whatsapp/:messageId/cancel"
+  @doc "POST /v1/whatsapp/messages/:messageId/cancel"
   def cancel_message(client, message_id, opts \\ []) do
-    Zenvio.request(client, :post, "/whatsapp/#{message_id}/cancel", nil, opts)
+    Zenvio.request(client, :post, "/whatsapp/messages/#{message_id}/cancel", nil, opts)
   end
 
   @doc """

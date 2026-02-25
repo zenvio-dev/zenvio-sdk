@@ -62,8 +62,8 @@ export class Zenvio {
    * WhatsApp API (matches POST/GET/DELETE/PATCH /v1/whatsapp/... and /v1/whatsapp/instances/...)
    */
   public whatsapp = {
-    /**
-     * POST /v1/whatsapp/send — Send one or more messages (1–100 recipients).
+/**
+     * POST /v1/whatsapp/messages — Send one or more messages (1–100 recipients).
      * @param instanceId Instance ID (WhatsApp connection).
      * @param params instance_id is omitted; it is taken from the first argument.
      */
@@ -72,7 +72,7 @@ export class Zenvio {
       params: Omit<WhatsAppSendParams<T>, 'instance_id'>
     ): Promise<WhatsAppSendResponse> => {
       const response = await this.client.post<WhatsAppSendResponse>(
-        '/whatsapp/send',
+        '/whatsapp/messages',
         normalizeSendBody(instanceId, params as Omit<WhatsAppSendParams, 'instance_id'>)
       );
       return response.data;
@@ -94,49 +94,49 @@ export class Zenvio {
     },
 
     /**
-     * GET /v1/whatsapp/:messageId — Message status (no success/data wrapper).
+     * GET /v1/whatsapp/messages/:messageId — Message status (no success/data wrapper).
      */
     getMessage: async (messageId: string): Promise<WhatsAppMessageStatus> => {
       const response = await this.client.get<WhatsAppMessageStatus>(
-        `/whatsapp/${messageId}`
+        `/whatsapp/messages/${messageId}`
       );
       return response.data;
     },
 
     /**
-     * DELETE /v1/whatsapp/:messageId — Delete message for everyone (revoke).
+     * DELETE /v1/whatsapp/messages/:messageId — Delete message for everyone (revoke).
      */
     deleteMessage: async (
       messageId: string
     ): Promise<WhatsAppMessageActionResponse> => {
       const response = await this.client.delete<WhatsAppMessageActionResponse>(
-        `/whatsapp/${messageId}`
+        `/whatsapp/messages/${messageId}`
       );
       return response.data;
     },
 
     /**
-     * PATCH /v1/whatsapp/:messageId/edit — Edit text of a sent message (text type only).
+     * PATCH /v1/whatsapp/messages/:messageId/edit — Edit text of a sent message (text type only).
      */
     editMessage: async (
       messageId: string,
       body: { text: string }
     ): Promise<WhatsAppMessageActionResponse> => {
       const response = await this.client.patch<WhatsAppMessageActionResponse>(
-        `/whatsapp/${messageId}/edit`,
+        `/whatsapp/messages/${messageId}/edit`,
         body
       );
       return response.data;
     },
 
     /**
-     * POST /v1/whatsapp/:messageId/cancel — Cancel a queued/scheduled message.
+     * POST /v1/whatsapp/messages/:messageId/cancel — Cancel a queued/scheduled message.
      */
     cancelMessage: async (
       messageId: string
     ): Promise<WhatsAppMessageActionResponse> => {
       const response = await this.client.post<WhatsAppMessageActionResponse>(
-        `/whatsapp/${messageId}/cancel`
+        `/whatsapp/messages/${messageId}/cancel`
       );
       return response.data;
     },
@@ -221,59 +221,59 @@ export class Zenvio {
   };
 
   /**
-   * SMS API — POST /v1/sms/send, GET /v1/sms/:id, POST /v1/sms/:id/cancel
+   * SMS API — POST /v1/sms/messages, GET /v1/sms/messages/:id, POST /v1/sms/messages/:id/cancel
    */
   public sms = {
     /**
-     * POST /v1/sms/send — Envia um ou mais SMS (1–100 números). Escopo: sms:send.
+     * POST /v1/sms/messages — Envia um ou mais SMS (1–100 números). Escopo: sms:send.
      */
     send: async (params: SmsSendParams): Promise<SmsSendResponse> => {
-      const response = await this.client.post<SmsSendResponse>('/sms/send', params);
+      const response = await this.client.post<SmsSendResponse>('/sms/messages', params);
       return response.data;
     },
 
     /**
-     * GET /v1/sms/:id — Status de um SMS. Escopo: sms:read.
+     * GET /v1/sms/messages/:id — Status de um SMS. Escopo: sms:read.
      */
     get: async (id: string): Promise<SmsStatusResponse> => {
-      const response = await this.client.get<SmsStatusResponse>(`/sms/${id}`);
+      const response = await this.client.get<SmsStatusResponse>(`/sms/messages/${id}`);
       return response.data;
     },
 
     /**
-     * POST /v1/sms/:id/cancel — Cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel.
+     * POST /v1/sms/messages/:id/cancel — Cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel.
      */
     cancel: async (id: string): Promise<SmsCancelResponse> => {
-      const response = await this.client.post<SmsCancelResponse>(`/sms/${id}/cancel`);
+      const response = await this.client.post<SmsCancelResponse>(`/sms/messages/${id}/cancel`);
       return response.data;
     },
   };
 
   /**
-   * Email API — POST /v1/email/send, GET /v1/email/:id, POST /v1/email/:id/cancel
+   * Email API — POST /v1/email/messages, GET /v1/email/messages/:id, POST /v1/email/messages/:id/cancel
    */
   public email = {
     /**
-     * POST /v1/email/send — Envia um ou mais e-mails (1–100 destinatários). Domínio do from deve estar verificado. Escopo: email:send.
+     * POST /v1/email/messages — Envia um ou mais e-mails (1–100 destinatários). Domínio do from deve estar verificado. Escopo: email:send.
      */
     send: async (params: EmailSendParams): Promise<EmailSendResponse> => {
-      const response = await this.client.post<EmailSendResponse>('/email/send', params);
+      const response = await this.client.post<EmailSendResponse>('/email/messages', params);
       return response.data;
     },
 
     /**
-     * GET /v1/email/:id — Status de um e-mail. Escopo: email:read.
+     * GET /v1/email/messages/:id — Status de um e-mail. Escopo: email:read.
      */
     get: async (id: string): Promise<EmailStatusResponse> => {
-      const response = await this.client.get<EmailStatusResponse>(`/email/${id}`);
+      const response = await this.client.get<EmailStatusResponse>(`/email/messages/${id}`);
       return response.data;
     },
 
     /**
-     * POST /v1/email/:id/cancel — Cancela e-mail agendado (status SCHEDULED). Escopo: email:cancel.
+     * POST /v1/email/messages/:id/cancel — Cancela e-mail agendado (status SCHEDULED). Escopo: email:cancel.
      */
     cancel: async (id: string): Promise<EmailCancelResponse> => {
-      const response = await this.client.post<EmailCancelResponse>(`/email/${id}/cancel`);
+      const response = await this.client.post<EmailCancelResponse>(`/email/messages/${id}/cancel`);
       return response.data;
     },
   };

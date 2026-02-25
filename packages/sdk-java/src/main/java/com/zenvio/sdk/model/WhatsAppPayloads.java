@@ -3,7 +3,7 @@ package com.zenvio.sdk.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
- * Payloads para POST /v1/whatsapp/send (API usa "message" para texto, "media_url" para mídia).
+ * Payloads para POST /v1/whatsapp/messages (API usa "message" para texto, "media_url" para mídia).
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public final class WhatsAppPayloads {

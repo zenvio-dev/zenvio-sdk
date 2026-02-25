@@ -13,7 +13,7 @@ func TestWhatsAppSendText(t *testing.T) {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		if r.URL.Path != "/whatsapp/send" || r.Method != "POST" {
+		if r.URL.Path != "/whatsapp/messages" || r.Method != "POST" {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -115,7 +115,7 @@ func TestWhatsAppListInstances(t *testing.T) {
 
 func TestSmsSend(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/sms/send" {
+		if r.URL.Path != "/sms/messages" {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}

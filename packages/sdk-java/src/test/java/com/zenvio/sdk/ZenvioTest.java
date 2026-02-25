@@ -47,7 +47,7 @@ class ZenvioTest {
         verify(mockHttpClient).send(requestCaptor.capture(), any());
         HttpRequest req = requestCaptor.getValue();
         assertEquals("POST", req.method());
-        assertEquals("https://api.zenvio.com/v1/whatsapp/send", req.uri().toString());
+        assertEquals("https://api.zenvio.com/v1/whatsapp/messages", req.uri().toString());
         assertTrue(req.bodyPublisher().isPresent());
     }
 

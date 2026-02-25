@@ -26,7 +26,7 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
     zenvio = new Zenvio({ apiKey: 'test-api-key' });
   });
 
-  it('sends via POST /whatsapp/send with instance_id in body', async () => {
+  it('sends via POST /whatsapp/messages with instance_id in body', async () => {
     mockPost.mockResolvedValueOnce({
       data: { message_ids: ['msg-1'], status: 'queued' },
     });
@@ -38,7 +38,7 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
     });
 
     expect(mockPost).toHaveBeenCalledWith(
-      '/whatsapp/send',
+      '/whatsapp/messages',
       expect.objectContaining({
         instance_id: 'instance-abc',
         to: ['5511999999999'],
@@ -50,7 +50,7 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
     expect(result.status).toBe('queued');
   });
 
-  it('sendText uses payload.message and POST /whatsapp/send', async () => {
+  it('sendText uses payload.message and POST /whatsapp/messages', async () => {
     mockPost.mockResolvedValueOnce({
       data: { message_ids: ['m1'], status: 'queued' },
     });
@@ -58,7 +58,7 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
     await zenvio.whatsapp.sendText('inst-1', '5511999999999', 'Hello');
 
     expect(mockPost).toHaveBeenCalledWith(
-      '/whatsapp/send',
+      '/whatsapp/messages',
       expect.objectContaining({
         instance_id: 'inst-1',
         to: ['5511999999999'],
@@ -76,7 +76,7 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
     await zenvio.whatsapp.sendText('inst-1', ['5511999999999', '5521988887777'], 'Hi');
 
     expect(mockPost).toHaveBeenCalledWith(
-      '/whatsapp/send',
+      '/whatsapp/messages',
       expect.objectContaining({
         to: ['5511999999999', '5521988887777'],
         payload: { message: 'Hi' },
@@ -96,7 +96,7 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
     });
 
     expect(mockPost).toHaveBeenCalledWith(
-      '/whatsapp/send',
+      '/whatsapp/messages',
       expect.objectContaining({
         type: 'image',
         payload: { media_url: 'https://example.com/image.png', file_name: 'image.png', mimetype: 'image/png' },
@@ -117,7 +117,7 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
     expect(mockPost).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ type: 'document' }));
   });
 
-  it('getMessage calls GET /whatsapp/:messageId', async () => {
+  it('getMessage calls GET /whatsapp/messages/:messageId', async () => {
     mockGet.mockResolvedValueOnce({
       data: {
         message_id: 'msg-1',
@@ -130,41 +130,41 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
 
     const result = await zenvio.whatsapp.getMessage('msg-1');
 
-    expect(mockGet).toHaveBeenCalledWith('/whatsapp/msg-1');
+    expect(mockGet).toHaveBeenCalledWith('/whatsapp/messages/msg-1');
     expect(result.message_id).toBe('msg-1');
     expect(result.status).toBe('sent');
   });
 
-  it('deleteMessage calls DELETE /whatsapp/:messageId', async () => {
+  it('deleteMessage calls DELETE /whatsapp/messages/:messageId', async () => {
     mockDelete.mockResolvedValueOnce({
       data: { success: true, message_ids: ['msg-1'], status: 'deleted' },
     });
 
     const result = await zenvio.whatsapp.deleteMessage('msg-1');
 
-    expect(mockDelete).toHaveBeenCalledWith('/whatsapp/msg-1');
+    expect(mockDelete).toHaveBeenCalledWith('/whatsapp/messages/msg-1');
     expect(result.status).toBe('deleted');
   });
 
-  it('editMessage calls PATCH /whatsapp/:messageId/edit', async () => {
+  it('editMessage calls PATCH /whatsapp/messages/:messageId/edit', async () => {
     mockPatch.mockResolvedValueOnce({
       data: { success: true, message_ids: ['msg-1'], status: 'edited' },
     });
 
     const result = await zenvio.whatsapp.editMessage('msg-1', { text: 'New text' });
 
-    expect(mockPatch).toHaveBeenCalledWith('/whatsapp/msg-1/edit', { text: 'New text' });
+    expect(mockPatch).toHaveBeenCalledWith('/whatsapp/messages/msg-1/edit', { text: 'New text' });
     expect(result.status).toBe('edited');
   });
 
-  it('cancelMessage calls POST /whatsapp/:messageId/cancel', async () => {
+  it('cancelMessage calls POST /whatsapp/messages/:messageId/cancel', async () => {
     mockPost.mockResolvedValueOnce({
       data: { success: true, message_ids: ['msg-1'], status: 'cancelled' },
     });
 
     const result = await zenvio.whatsapp.cancelMessage('msg-1');
 
-    expect(mockPost).toHaveBeenCalledWith('/whatsapp/msg-1/cancel');
+    expect(mockPost).toHaveBeenCalledWith('/whatsapp/messages/msg-1/cancel');
     expect(result.status).toBe('cancelled');
   });
 
@@ -307,7 +307,7 @@ describe('Node.js SDK — SMS', () => {
     zenvio = new Zenvio({ apiKey: 'test-key' });
   });
 
-  it('sms.send calls POST /sms/send with to, message, schedule?, options?', async () => {
+  it('sms.send calls POST /sms/messages with to, message, schedule?, options?', async () => {
     mockPost.mockResolvedValueOnce({
       data: {
         success: true,
@@ -320,7 +320,7 @@ describe('Node.js SDK — SMS', () => {
       message: 'Olá!',
     });
 
-    expect(mockPost).toHaveBeenCalledWith('/sms/send', {
+    expect(mockPost).toHaveBeenCalledWith('/sms/messages', {
       to: ['5511999999999'],
       message: 'Olá!',
     });
@@ -329,7 +329,7 @@ describe('Node.js SDK — SMS', () => {
     expect(result.data.status).toBe('queued');
   });
 
-  it('sms.get calls GET /sms/:id', async () => {
+  it('sms.get calls GET /sms/messages/:id', async () => {
     mockGet.mockResolvedValueOnce({
       data: {
         success: true,
@@ -352,12 +352,12 @@ describe('Node.js SDK — SMS', () => {
 
     const result = await zenvio.sms.get('sms-1');
 
-    expect(mockGet).toHaveBeenCalledWith('/sms/sms-1');
+    expect(mockGet).toHaveBeenCalledWith('/sms/messages/sms-1');
     expect(result.data.sms_id).toBe('sms-1');
     expect(result.data.status).toBe('DELIVERED');
   });
 
-  it('sms.cancel calls POST /sms/:id/cancel', async () => {
+  it('sms.cancel calls POST /sms/messages/:id/cancel', async () => {
     mockPost.mockResolvedValueOnce({
       data: {
         success: true,
@@ -367,7 +367,7 @@ describe('Node.js SDK — SMS', () => {
 
     const result = await zenvio.sms.cancel('sms-1');
 
-    expect(mockPost).toHaveBeenCalledWith('/sms/sms-1/cancel');
+    expect(mockPost).toHaveBeenCalledWith('/sms/messages/sms-1/cancel');
     expect(result.success).toBe(true);
     expect(result.data.sms_id).toBe('sms-1');
     expect(result.data.status).toBe('cancelled');
@@ -391,7 +391,7 @@ describe('Node.js SDK — Email', () => {
     zenvio = new Zenvio({ apiKey: 'test-key' });
   });
 
-  it('email.send calls POST /email/send with from, to, subject, text/html', async () => {
+  it('email.send calls POST /email/messages with from, to, subject, text/html', async () => {
     mockPost.mockResolvedValueOnce({
       data: {
         success: true,
@@ -406,7 +406,7 @@ describe('Node.js SDK — Email', () => {
       html: '<p>Hello</p>',
     });
 
-    expect(mockPost).toHaveBeenCalledWith('/email/send', {
+    expect(mockPost).toHaveBeenCalledWith('/email/messages', {
       from: 'noreply@example.com',
       to: ['user@example.com'],
       subject: 'Test',
@@ -416,7 +416,7 @@ describe('Node.js SDK — Email', () => {
     expect(result.data.status).toBe('queued');
   });
 
-  it('email.get calls GET /email/:id', async () => {
+  it('email.get calls GET /email/messages/:id', async () => {
     mockGet.mockResolvedValueOnce({
       data: {
         success: true,
@@ -440,12 +440,12 @@ describe('Node.js SDK — Email', () => {
 
     const result = await zenvio.email.get('em-1');
 
-    expect(mockGet).toHaveBeenCalledWith('/email/em-1');
+    expect(mockGet).toHaveBeenCalledWith('/email/messages/em-1');
     expect(result.data.id).toBe('em-1');
     expect(result.data.status).toBe('SENT');
   });
 
-  it('email.cancel calls POST /email/:id/cancel', async () => {
+  it('email.cancel calls POST /email/messages/:id/cancel', async () => {
     mockPost.mockResolvedValueOnce({
       data: {
         success: true,
@@ -455,7 +455,7 @@ describe('Node.js SDK — Email', () => {
 
     const result = await zenvio.email.cancel('em-1');
 
-    expect(mockPost).toHaveBeenCalledWith('/email/em-1/cancel');
+    expect(mockPost).toHaveBeenCalledWith('/email/messages/em-1/cancel');
     expect(result.data.status).toBe('cancelled');
   });
 });

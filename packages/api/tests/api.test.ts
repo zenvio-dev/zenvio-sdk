@@ -4,8 +4,8 @@ import request from 'supertest';
 const app = express();
 app.use(express.json());
 
-// Matches real API: POST /v1/whatsapp/send (body: instance_id, to, type, payload)
-app.post('/v1/whatsapp/send', (req, res) => {
+// Matches real API: POST /v1/whatsapp/messages (body: instance_id, to, type, payload)
+app.post('/v1/whatsapp/messages', (req, res) => {
   const { instance_id, to, type, payload } = req.body;
 
   if (!instance_id || !to || !type || !payload) {
@@ -29,9 +29,9 @@ app.post('/v1/whatsapp/send', (req, res) => {
 });
 
 describe('Backend API Contract (WhatsApp send)', () => {
-  it('accepts POST /v1/whatsapp/send with instance_id in body', async () => {
+  it('accepts POST /v1/whatsapp/messages with instance_id in body', async () => {
     const response = await request(app)
-      .post('/v1/whatsapp/send')
+      .post('/v1/whatsapp/messages')
       .send({
         instance_id: 'instance-123',
         to: ['5511999999999'],
@@ -46,7 +46,7 @@ describe('Backend API Contract (WhatsApp send)', () => {
 
   it('rejects text type without payload.message', async () => {
     const response = await request(app)
-      .post('/v1/whatsapp/send')
+      .post('/v1/whatsapp/messages')
       .send({
         instance_id: 'instance-123',
         to: ['5511999999999'],

@@ -11,7 +11,7 @@ from zenvio import Zenvio
 def test_whatsapp_send_uses_post_whatsapp_send_with_instance_id_in_body():
     with requests_mock.Mocker() as m:
         m.post(
-            "https://api.zenvio.com/v1/whatsapp/send",
+            "https://api.zenvio.com/v1/whatsapp/messages",
             json={"message_ids": ["msg-1"], "status": "queued"},
             status_code=202,
         )
@@ -34,7 +34,7 @@ def test_whatsapp_send_uses_post_whatsapp_send_with_instance_id_in_body():
 def test_whatsapp_send_text():
     with requests_mock.Mocker() as m:
         m.post(
-            "https://api.zenvio.com/v1/whatsapp/send",
+            "https://api.zenvio.com/v1/whatsapp/messages",
             json={"message_ids": ["m1"], "status": "queued"},
             status_code=202,
         )
@@ -49,7 +49,7 @@ def test_whatsapp_send_text():
 def test_whatsapp_get_message():
     with requests_mock.Mocker() as m:
         m.get(
-            "https://api.zenvio.com/v1/whatsapp/msg-1",
+            "https://api.zenvio.com/v1/whatsapp/messages/msg-1",
             json={
                 "message_id": "msg-1",
                 "to": "5511999999999",
@@ -67,11 +67,11 @@ def test_whatsapp_get_message():
 def test_whatsapp_delete_and_cancel():
     with requests_mock.Mocker() as m:
         m.delete(
-            "https://api.zenvio.com/v1/whatsapp/msg-1",
+            "https://api.zenvio.com/v1/whatsapp/messages/msg-1",
             json={"success": True, "message_ids": ["msg-1"], "status": "deleted"},
         )
         m.post(
-            "https://api.zenvio.com/v1/whatsapp/msg-2/cancel",
+            "https://api.zenvio.com/v1/whatsapp/messages/msg-2/cancel",
             json={"success": True, "message_ids": ["msg-2"], "status": "cancelled"},
         )
         client = Zenvio(api_key="test-key")
@@ -107,7 +107,7 @@ def test_whatsapp_instances_list_and_get():
 def test_sms_send():
     with requests_mock.Mocker() as m:
         m.post(
-            "https://api.zenvio.com/v1/sms/send",
+            "https://api.zenvio.com/v1/sms/messages",
             json={
                 "success": True,
                 "data": {"status": "queued", "count": 1, "sms_ids": ["sms-1"]},
@@ -163,7 +163,7 @@ def test_sms_cancel():
 def test_email_send():
     with requests_mock.Mocker() as m:
         m.post(
-            "https://api.zenvio.com/v1/email/send",
+            "https://api.zenvio.com/v1/email/messages",
             json={
                 "success": True,
                 "data": {"email_ids": ["em-1"], "status": "queued", "count": 1},
@@ -242,7 +242,7 @@ def test_messages_send():
 def test_api_error_raises():
     with requests_mock.Mocker() as m:
         m.post(
-            "https://api.zenvio.com/v1/whatsapp/send",
+            "https://api.zenvio.com/v1/whatsapp/messages",
             json={"message": "Invalid API Key", "success": False},
             status_code=401,
         )

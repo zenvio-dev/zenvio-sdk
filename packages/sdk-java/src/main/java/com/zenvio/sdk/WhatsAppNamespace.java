@@ -17,10 +17,10 @@ public class WhatsAppNamespace {
         this.client = client;
     }
 
-    /** POST /v1/whatsapp/send — instance_id no body */
+    /** POST /v1/whatsapp/messages — instance_id no body */
     public WhatsAppSendResponse send(String instanceId, WhatsAppSendParams params) {
         params.setInstanceId(instanceId);
-        return client.request("POST", "/whatsapp/send", params, WhatsAppSendResponse.class);
+        return client.request("POST", "/whatsapp/messages", params, WhatsAppSendResponse.class);
     }
 
     /** Atalho: texto (payload.message) */
@@ -34,24 +34,24 @@ public class WhatsAppNamespace {
         params.setTo(to);
         params.setType("text");
         params.setPayload(new WhatsAppPayloads.TextPayload(text));
-        return client.request("POST", "/whatsapp/send", params, WhatsAppSendResponse.class);
+        return client.request("POST", "/whatsapp/messages", params, WhatsAppSendResponse.class);
     }
 
     public WhatsAppMessageStatus getMessage(String messageId) {
-        return client.request("GET", "/whatsapp/" + messageId, null, WhatsAppMessageStatus.class);
+        return client.request("GET", "/whatsapp/messages/" + messageId, null, WhatsAppMessageStatus.class);
     }
 
     public WhatsAppMessageActionResponse deleteMessage(String messageId) {
-        return client.request("DELETE", "/whatsapp/" + messageId, null, WhatsAppMessageActionResponse.class);
+        return client.request("DELETE", "/whatsapp/messages/" + messageId, null, WhatsAppMessageActionResponse.class);
     }
 
     public WhatsAppMessageActionResponse editMessage(String messageId, String text) {
-        return client.request("PATCH", "/whatsapp/" + messageId + "/edit",
+        return client.request("PATCH", "/whatsapp/messages/" + messageId + "/edit",
                 Map.of("text", text), WhatsAppMessageActionResponse.class);
     }
 
     public WhatsAppMessageActionResponse cancelMessage(String messageId) {
-        return client.request("POST", "/whatsapp/" + messageId + "/cancel", null, WhatsAppMessageActionResponse.class);
+        return client.request("POST", "/whatsapp/messages/" + messageId + "/cancel", null, WhatsAppMessageActionResponse.class);
     }
 
     public WhatsAppInstanceListResponse listInstances() {

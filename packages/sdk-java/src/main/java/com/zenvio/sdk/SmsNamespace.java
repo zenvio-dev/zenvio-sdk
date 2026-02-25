@@ -6,7 +6,7 @@ import com.zenvio.sdk.model.SmsSendResponse;
 import com.zenvio.sdk.model.SmsStatusResponse;
 
 /**
- * POST /v1/sms/send, GET /v1/sms/{id}, POST /v1/sms/{id}/cancel
+ * POST /v1/sms/messages, GET /v1/sms/messages/{id}, POST /v1/sms/messages/{id}/cancel
  */
 public class SmsNamespace {
     private final Zenvio client;
@@ -16,14 +16,14 @@ public class SmsNamespace {
     }
 
     public SmsSendResponse send(SmsSendParams params) {
-        return client.request("POST", "/sms/send", params, SmsSendResponse.class);
+        return client.request("POST", "/sms/messages", params, SmsSendResponse.class);
     }
 
     public SmsStatusResponse get(String messageId) {
-        return client.request("GET", "/sms/" + messageId, null, SmsStatusResponse.class);
+        return client.request("GET", "/sms/messages/" + messageId, null, SmsStatusResponse.class);
     }
 
     public SmsCancelResponse cancel(String messageId) {
-        return client.request("POST", "/sms/" + messageId + "/cancel", null, SmsCancelResponse.class);
+        return client.request("POST", "/sms/messages/" + messageId + "/cancel", null, SmsCancelResponse.class);
     }
 }

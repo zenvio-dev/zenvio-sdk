@@ -3,7 +3,7 @@ package com.zenvio.sdk.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 
-/** Body para POST /v1/whatsapp/send */
+/** Body para POST /v1/whatsapp/messages */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WhatsAppSendParams {
     private String instanceId;

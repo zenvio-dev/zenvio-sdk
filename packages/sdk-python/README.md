@@ -18,7 +18,7 @@ zenvio = Zenvio(api_key="sua_api_key")
 
 ### WhatsApp
 
-- **POST /v1/whatsapp/send** — `instance_id` no body (não na URL).
+- **POST /v1/whatsapp/messages** — `instance_id` no body (não na URL).
 - Texto: `payload.message`. Mídia: `payload.media_url`.
 
 ```python

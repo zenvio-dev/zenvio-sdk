@@ -30,7 +30,7 @@ try {
 
 ## WhatsApp
 
-- **POST /v1/whatsapp/send** — `send($instanceId, $params)` ou `sendText($instanceId, $to, $text)`
+- **POST /v1/whatsapp/messages** — `send($instanceId, $params)` ou `sendText($instanceId, $to, $text)`
 - **GET/DELETE/PATCH/POST** — `getMessage($id)`, `deleteMessage($id)`, `editMessage($id, $text)`, `cancelMessage($id)`
 - **Instâncias** — `listInstances($params)`, `getInstance($id)`, `createInstance($name)`, `disconnectInstance($id)`, `deleteInstance($id)`
 

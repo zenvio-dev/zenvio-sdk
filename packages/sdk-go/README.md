@@ -38,7 +38,7 @@ func main() {
 
 ## WhatsApp
 
-- **POST /v1/whatsapp/send** — `Send(instanceID, params)` ou `SendText(instanceID, to, text)`
+- **POST /v1/whatsapp/messages** — `Send(instanceID, params)` ou `SendText(instanceID, to, text)`
 - **GET/DELETE/PATCH/POST** — `GetMessage(id)`, `DeleteMessage(id)`, `EditMessage(id, text)`, `CancelMessage(id)`
 - **Instâncias** — `ListInstances(params)`, `GetInstance(id)`, `CreateInstance(name)`, `DisconnectInstance(id)`, `DeleteInstance(id)`
 

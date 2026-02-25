@@ -3,7 +3,7 @@
 namespace Zenvio;
 
 /**
- * Email — POST /v1/email/send, GET /v1/email/:id, POST /v1/email/:id/cancel
+ * Email — POST /v1/email/messages, GET /v1/email/messages/:id, POST /v1/email/messages/:id/cancel
  */
 class Email
 {
@@ -15,23 +15,23 @@ class Email
     }
 
     /**
-     * POST /v1/email/send (campo "from" na API)
+     * POST /v1/email/messages (campo "from" na API)
      * @param array{from: string, from_name?: string, to: list<string>, subject: string, text?: string, html?: string, schedule?: array, options?: array} $params
      */
     public function send(array $params): array
     {
-        return $this->client->request('POST', '/email/send', $params);
+        return $this->client->request('POST', '/email/messages', $params);
     }
 
-    /** GET /v1/email/:id */
+    /** GET /v1/email/messages/:id */
     public function get(string $id): array
     {
-        return $this->client->request('GET', '/email/' . $id, null);
+        return $this->client->request('GET', '/email/messages/' . $id, null);
     }
 
-    /** POST /v1/email/:id/cancel */
+    /** POST /v1/email/messages/:id/cancel */
     public function cancel(string $id): array
     {
-        return $this->client->request('POST', '/email/' . $id . '/cancel', null);
+        return $this->client->request('POST', '/email/messages/' . $id . '/cancel', null);
     }
 }

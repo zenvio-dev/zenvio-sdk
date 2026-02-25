@@ -1,6 +1,6 @@
 package zenvio
 
-// ========== WhatsApp — POST /v1/whatsapp/send, GET/DELETE/PATCH/POST /v1/whatsapp/:id, instances ==========
+// ========== WhatsApp — POST /v1/whatsapp/messages, GET/DELETE/PATCH/POST /v1/whatsapp/messages/:id, instances ==========
 
 // WhatsAppTextPayload — tipo text: payload.message
 type WhatsAppTextPayload struct {
@@ -38,7 +38,7 @@ type WhatsAppContactMessagePayload struct {
 	ContactID string                  `json:"contact_id,omitempty"`
 }
 
-// WhatsAppSendParams — body para POST /v1/whatsapp/send
+// WhatsAppSendParams — body para POST /v1/whatsapp/messages
 type WhatsAppSendParams struct {
 	InstanceID string      `json:"instance_id"`
 	To         []string    `json:"to"`
@@ -60,7 +60,7 @@ type WhatsAppSendResponse struct {
 	ScheduledAt string   `json:"scheduled_at,omitempty"`
 }
 
-// WhatsAppMessageStatus — GET /v1/whatsapp/:messageId
+// WhatsAppMessageStatus — GET /v1/whatsapp/messages/:messageId
 type WhatsAppMessageStatus struct {
 	MessageID   string  `json:"message_id"`
 	To          string  `json:"to"`
@@ -133,9 +133,9 @@ type WhatsAppInstanceActionResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
-// ========== SMS — POST /v1/sms/send, GET /v1/sms/:id ==========
+// ========== SMS — POST /v1/sms/messages, GET /v1/sms/messages/:id ==========
 
-// SmsSendParams — body para POST /v1/sms/send
+// SmsSendParams — body para POST /v1/sms/messages
 type SmsSendParams struct {
 	To      []string `json:"to"`
 	Message string   `json:"message"`
@@ -158,7 +158,7 @@ type SmsSendResponse struct {
 	} `json:"data"`
 }
 
-// SmsStatusResponse — GET /v1/sms/:id
+// SmsStatusResponse — GET /v1/sms/messages/:id
 type SmsStatusResponse struct {
 	Success bool `json:"success"`
 	Data    struct {
@@ -177,7 +177,7 @@ type SmsStatusResponse struct {
 	} `json:"data"`
 }
 
-// SmsCancelResponse — POST /v1/sms/:id/cancel
+// SmsCancelResponse — POST /v1/sms/messages/:id/cancel
 type SmsCancelResponse struct {
 	Success bool `json:"success"`
 	Data    struct {
@@ -186,9 +186,9 @@ type SmsCancelResponse struct {
 	} `json:"data"`
 }
 
-// ========== Email — POST /v1/email/send, GET /v1/email/:id, POST /v1/email/:id/cancel ==========
+// ========== Email — POST /v1/email/messages, GET /v1/email/messages/:id, POST /v1/email/messages/:id/cancel ==========
 
-// EmailSendParams — body para POST /v1/email/send (campo "from" na API)
+// EmailSendParams — body para POST /v1/email/messages (campo "from" na API)
 type EmailSendParams struct {
 	From     string   `json:"from"`
 	FromName string   `json:"from_name,omitempty"`
@@ -215,7 +215,7 @@ type EmailSendResponse struct {
 	} `json:"data"`
 }
 
-// EmailStatusResponse — GET /v1/email/:id
+// EmailStatusResponse — GET /v1/email/messages/:id
 type EmailStatusResponse struct {
 	Success bool `json:"success"`
 	Data    struct {
@@ -235,7 +235,7 @@ type EmailStatusResponse struct {
 	} `json:"data"`
 }
 
-// EmailCancelResponse — POST /v1/email/:id/cancel
+// EmailCancelResponse — POST /v1/email/messages/:id/cancel
 type EmailCancelResponse struct {
 	Success bool `json:"success"`
 	Data    struct {

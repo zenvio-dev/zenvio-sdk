@@ -64,7 +64,7 @@ export type WhatsAppPayloadByType = {
 };
 
 /* =====================================================
-   Send request (POST /v1/whatsapp/send)
+   Send request (POST /v1/whatsapp/messages)
    ===================================================== */
 
 export interface WhatsAppSendParams<T extends WhatsAppMessageType = WhatsAppMessageType> {
@@ -94,7 +94,7 @@ export interface WhatsAppSendResponse {
 }
 
 /* =====================================================
-   Message status (GET /v1/whatsapp/:messageId)
+   Message status (GET /v1/whatsapp/messages/:messageId)
    ===================================================== */
 
 export interface WhatsAppMessageStatus {
@@ -197,7 +197,7 @@ export interface SendResponse {
 }
 
 /* =====================================================
-   SMS API (POST /v1/sms/send, GET /v1/sms/:id)
+   SMS API (POST /v1/sms/messages, GET /v1/sms/messages/:id)
    ===================================================== */
 
 export interface SmsSendParams {
@@ -252,7 +252,7 @@ export interface SmsCancelResponse {
 }
 
 /* =====================================================
-   Email API (POST /v1/email/send, GET /v1/email/:id, POST /v1/email/:id/cancel)
+   Email API (POST /v1/email/messages, GET /v1/email/messages/:id, POST /v1/email/messages/:id/cancel)
    ===================================================== */
 
 export interface EmailSendParams {

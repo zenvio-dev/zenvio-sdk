@@ -57,10 +57,10 @@ class WhatsAppNamespace:
         instance_id: str,
         params: Union[WhatsAppSendParams, Dict[str, Any]],
     ) -> WhatsAppSendResponse:
-        """POST /v1/whatsapp/send — Envia uma ou mais mensagens (1–100 destinatários)."""
+        """POST /v1/whatsapp/messages — Envia uma ou mais mensagens (1–100 destinatários)."""
         body = dict(params) if isinstance(params, dict) else dict(params)
         body["instance_id"] = instance_id
-        return self._client._request("POST", "/whatsapp/send", json=body)
+        return self._client._request("POST", "/whatsapp/messages", json=body)
 
     def send_text(
         self,
@@ -80,22 +80,22 @@ class WhatsAppNamespace:
         )
 
     def get_message(self, message_id: str) -> WhatsAppMessageStatus:
-        """GET /v1/whatsapp/:messageId — Status da mensagem."""
-        return self._client._request("GET", f"/whatsapp/{message_id}")
+        """GET /v1/whatsapp/messages/:messageId — Status da mensagem."""
+        return self._client._request("GET", f"/whatsapp/messages/{message_id}")
 
     def delete_message(self, message_id: str) -> WhatsAppMessageActionResponse:
-        """DELETE /v1/whatsapp/:messageId — Apagar para todos."""
-        return self._client._request("DELETE", f"/whatsapp/{message_id}")
+        """DELETE /v1/whatsapp/messages/:messageId — Apagar para todos."""
+        return self._client._request("DELETE", f"/whatsapp/messages/{message_id}")
 
     def edit_message(self, message_id: str, text: str) -> WhatsAppMessageActionResponse:
-        """PATCH /v1/whatsapp/:messageId/edit — Editar texto."""
+        """PATCH /v1/whatsapp/messages/:messageId/edit — Editar texto."""
         return self._client._request(
-            "PATCH", f"/whatsapp/{message_id}/edit", json={"text": text}
+            "PATCH", f"/whatsapp/messages/{message_id}/edit", json={"text": text}
         )
 
     def cancel_message(self, message_id: str) -> WhatsAppMessageActionResponse:
-        """POST /v1/whatsapp/:messageId/cancel — Cancelar agendada."""
-        return self._client._request("POST", f"/whatsapp/{message_id}/cancel")
+        """POST /v1/whatsapp/messages/:messageId/cancel — Cancelar agendada."""
+        return self._client._request("POST", f"/whatsapp/messages/{message_id}/cancel")
 
     def list_instances(
         self,
@@ -129,26 +129,26 @@ class WhatsAppNamespace:
 
 
 class SmsNamespace:
-    """POST /v1/sms/send, GET /v1/sms/:id, POST /v1/sms/:id/cancel."""
+    """POST /v1/sms/messages, GET /v1/sms/messages/:id, POST /v1/sms/messages/:id/cancel."""
 
     def __init__(self, client: "Zenvio") -> None:
         self._client = client
 
     def send(self, params: Union[SmsSendParams, Dict[str, Any]]) -> SmsSendResponse:
-        """POST /v1/sms/send — Envia um ou mais SMS (1–100 números)."""
-        return self._client._request("POST", "/sms/send", json=params)
+        """POST /v1/sms/messages — Envia um ou mais SMS (1–100 números)."""
+        return self._client._request("POST", "/sms/messages", json=params)
 
     def get(self, sms_id: str) -> SmsStatusResponse:
-        """GET /v1/sms/:id — Status do SMS."""
-        return self._client._request("GET", f"/sms/{sms_id}")
+        """GET /v1/sms/messages/:id — Status do SMS."""
+        return self._client._request("GET", f"/sms/messages/{sms_id}")
 
     def cancel(self, sms_id: str) -> SmsCancelResponse:
-        """POST /v1/sms/:id/cancel — Cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel."""
-        return self._client._request("POST", f"/sms/{sms_id}/cancel")
+        """POST /v1/sms/messages/:id/cancel — Cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel."""
+        return self._client._request("POST", f"/sms/messages/{sms_id}/cancel")
 
 
 class EmailNamespace:
-    """POST /v1/email/send, GET /v1/email/:id, POST /v1/email/:id/cancel."""
+    """POST /v1/email/messages, GET /v1/email/messages/:id, POST /v1/email/messages/:id/cancel."""
 
     def __init__(self, client: "Zenvio") -> None:
         self._client = client
@@ -157,18 +157,18 @@ class EmailNamespace:
         self,
         params: Union[EmailSendParams, Dict[str, Any]],
     ) -> EmailSendResponse:
-        """POST /v1/email/send — Envia e-mail(s). Use from_address no dict."""
+        """POST /v1/email/messages — Envia e-mail(s). Use from_address no dict."""
         return self._client._request(
-            "POST", "/email/send", json=_prepare_email_params(dict(params))
+            "POST", "/email/messages", json=_prepare_email_params(dict(params))
         )
 
     def get(self, email_id: str) -> EmailStatusResponse:
-        """GET /v1/email/:id — Status do e-mail."""
-        return self._client._request("GET", f"/email/{email_id}")
+        """GET /v1/email/messages/:id — Status do e-mail."""
+        return self._client._request("GET", f"/email/messages/{email_id}")
 
     def cancel(self, email_id: str) -> EmailCancelResponse:
-        """POST /v1/email/:id/cancel — Cancela e-mail agendado."""
-        return self._client._request("POST", f"/email/{email_id}/cancel")
+        """POST /v1/email/messages/:id/cancel — Cancela e-mail agendado."""
+        return self._client._request("POST", f"/email/messages/{email_id}/cancel")
 
 
 class MessagesNamespace:

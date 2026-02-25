@@ -15,7 +15,7 @@ defmodule ZenvioTest do
     test "send_text success", %{client: client} do
       adapter = fn %Req.Request{} = req ->
         assert req.options[:method] == :post
-        assert to_string(req.url) =~ "whatsapp/send"
+        assert to_string(req.url) =~ "whatsapp/messages"
         body = req.options[:json]
         assert body["instance_id"] == "instance-1"
         assert body["payload"]["message"] == "Hello"

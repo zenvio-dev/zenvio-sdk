@@ -30,7 +30,7 @@ end
 
 ## WhatsApp
 
-- **POST /v1/whatsapp/send** — `Zenvio.Whatsapp.send(client, instance_id, params)` ou `send_text(client, instance_id, to, text)`
+- **POST /v1/whatsapp/messages** — `Zenvio.Whatsapp.send(client, instance_id, params)` ou `send_text(client, instance_id, to, text)`
 - **GET/DELETE/PATCH/POST** — `get_message`, `delete_message`, `edit_message`, `cancel_message`
 - **Instâncias** — `list_instances`, `get_instance`, `create_instance`, `disconnect_instance`, `delete_instance`
 

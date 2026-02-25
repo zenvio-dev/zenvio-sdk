@@ -56,7 +56,7 @@ class WhatsAppOptions(TypedDict, total=False):
     maxRetries: int  # 0-5
 
 
-# Params para POST /v1/whatsapp/send (instance_id no body)
+# Params para POST /v1/whatsapp/messages (instance_id no body)
 class WhatsAppSendParams(TypedDict, total=False):
     instance_id: str
     to: List[str]

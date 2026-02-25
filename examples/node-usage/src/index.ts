@@ -17,7 +17,7 @@ async function main() {
   console.log('--- Zenvio SDK WhatsApp Example ---');
 
   try {
-    // 1. Text (shortcut) — POST /v1/whatsapp/send with payload.message
+    // 1. Text (shortcut) — POST /v1/whatsapp/messages with payload.message
     console.log('Sending text (sendText)...');
     const simpleRes = await zenvio.whatsapp.sendText(instanceId, myPhoneNumber, 'Simple hello! 👋');
     console.log('Result:', simpleRes.message_ids, simpleRes.status);

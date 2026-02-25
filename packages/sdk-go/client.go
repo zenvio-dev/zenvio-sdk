@@ -110,11 +110,11 @@ type WhatsAppNamespace struct {
 	client *Client
 }
 
-// Send envia mensagem(s) — POST /v1/whatsapp/send (instance_id no body).
+// Send envia mensagem(s) — POST /v1/whatsapp/messages (instance_id no body).
 func (w *WhatsAppNamespace) Send(instanceID string, params WhatsAppSendParams) (*WhatsAppSendResponse, error) {
 	params.InstanceID = instanceID
 	var res WhatsAppSendResponse
-	if err := w.client.request("POST", "/whatsapp/send", params, &res); err != nil {
+	if err := w.client.request("POST", "/whatsapp/messages", params, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -131,38 +131,38 @@ func (w *WhatsAppNamespace) SendText(instanceID string, to []string, text string
 	return w.Send(instanceID, params)
 }
 
-// GetMessage GET /v1/whatsapp/:messageId
+// GetMessage GET /v1/whatsapp/messages/:messageId
 func (w *WhatsAppNamespace) GetMessage(messageID string) (*WhatsAppMessageStatus, error) {
 	var res WhatsAppMessageStatus
-	if err := w.client.request("GET", "/whatsapp/"+messageID, nil, &res); err != nil {
+	if err := w.client.request("GET", "/whatsapp/messages/"+messageID, nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
 
-// DeleteMessage DELETE /v1/whatsapp/:messageId
+// DeleteMessage DELETE /v1/whatsapp/messages/:messageId
 func (w *WhatsAppNamespace) DeleteMessage(messageID string) (*WhatsAppMessageActionResponse, error) {
 	var res WhatsAppMessageActionResponse
-	if err := w.client.request("DELETE", "/whatsapp/"+messageID, nil, &res); err != nil {
+	if err := w.client.request("DELETE", "/whatsapp/messages/"+messageID, nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
 
-// EditMessage PATCH /v1/whatsapp/:messageId/edit — body: { "text": "..." }
+// EditMessage PATCH /v1/whatsapp/messages/:messageId/edit — body: { "text": "..." }
 func (w *WhatsAppNamespace) EditMessage(messageID string, text string) (*WhatsAppMessageActionResponse, error) {
 	var res WhatsAppMessageActionResponse
 	body := map[string]string{"text": text}
-	if err := w.client.request("PATCH", "/whatsapp/"+messageID+"/edit", body, &res); err != nil {
+	if err := w.client.request("PATCH", "/whatsapp/messages/"+messageID+"/edit", body, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
 
-// CancelMessage POST /v1/whatsapp/:messageId/cancel
+// CancelMessage POST /v1/whatsapp/messages/:messageId/cancel
 func (w *WhatsAppNamespace) CancelMessage(messageID string) (*WhatsAppMessageActionResponse, error) {
 	var res WhatsAppMessageActionResponse
-	if err := w.client.request("POST", "/whatsapp/"+messageID+"/cancel", nil, &res); err != nil {
+	if err := w.client.request("POST", "/whatsapp/messages/"+messageID+"/cancel", nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -229,28 +229,28 @@ type SmsNamespace struct {
 	client *Client
 }
 
-// Send POST /v1/sms/send
+// Send POST /v1/sms/messages
 func (s *SmsNamespace) Send(params SmsSendParams) (*SmsSendResponse, error) {
 	var res SmsSendResponse
-	if err := s.client.request("POST", "/sms/send", params, &res); err != nil {
+	if err := s.client.request("POST", "/sms/messages", params, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
 
-// Get GET /v1/sms/:id
+// Get GET /v1/sms/messages/:id
 func (s *SmsNamespace) Get(id string) (*SmsStatusResponse, error) {
 	var res SmsStatusResponse
-	if err := s.client.request("GET", "/sms/"+id, nil, &res); err != nil {
+	if err := s.client.request("GET", "/sms/messages/"+id, nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
 
-// Cancel POST /v1/sms/:id/cancel — cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel.
+// Cancel POST /v1/sms/messages/:id/cancel — cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel.
 func (s *SmsNamespace) Cancel(id string) (*SmsCancelResponse, error) {
 	var res SmsCancelResponse
-	if err := s.client.request("POST", "/sms/"+id+"/cancel", nil, &res); err != nil {
+	if err := s.client.request("POST", "/sms/messages/"+id+"/cancel", nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -263,28 +263,28 @@ type EmailNamespace struct {
 	client *Client
 }
 
-// Send POST /v1/email/send
+// Send POST /v1/email/messages
 func (e *EmailNamespace) Send(params EmailSendParams) (*EmailSendResponse, error) {
 	var res EmailSendResponse
-	if err := e.client.request("POST", "/email/send", params, &res); err != nil {
+	if err := e.client.request("POST", "/email/messages", params, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
 
-// Get GET /v1/email/:id
+// Get GET /v1/email/messages/:id
 func (e *EmailNamespace) Get(id string) (*EmailStatusResponse, error) {
 	var res EmailStatusResponse
-	if err := e.client.request("GET", "/email/"+id, nil, &res); err != nil {
+	if err := e.client.request("GET", "/email/messages/"+id, nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
 
-// Cancel POST /v1/email/:id/cancel
+// Cancel POST /v1/email/messages/:id/cancel
 func (e *EmailNamespace) Cancel(id string) (*EmailCancelResponse, error) {
 	var res EmailCancelResponse
-	if err := e.client.request("POST", "/email/"+id+"/cancel", nil, &res); err != nil {
+	if err := e.client.request("POST", "/email/messages/"+id+"/cancel", nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
