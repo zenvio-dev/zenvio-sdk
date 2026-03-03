@@ -16,6 +16,7 @@ This monorepo contains SDKs for all major programming languages, ensuring a seam
 | **Go** | `zenvio-sdk-go` | ✅ Stable |
 | **PHP** | `zenvio-sdk-php` | ✅ Stable |
 | **Elixir** | `zenvio_ex` | ✅ Stable |
+| **.NET** | `Zenvio` | ✅ Stable |
 
 ---
 
@@ -53,6 +54,12 @@ $zenvio = new Zenvio('...');
 $zenvio.whatsapp.sendText($phoneId, '55119...', 'Hello! 🐘');
 ```
 
+### C# (.NET)
+```csharp
+var client = new ZenvioClient("...");
+await client.WhatsApp.SendTextAsync(instanceId, "55119...", "Hello! 🔷");
+```
+
 ---
 
 ## 🎨 Message Types
@@ -85,6 +92,7 @@ For detailed installation and usage instructions, please refer to the individual
 - [Go SDK](./packages/sdk-go)
 - [PHP SDK](./packages/sdk-php)
 - [Elixir SDK](./packages/sdk-elixir)
+- [.NET SDK](./packages/sdk-dotnet)
 
 ---
 

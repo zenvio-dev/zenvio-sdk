@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Zenvio</RootNamespace>
+    <PackageId>Zenvio</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Zenvio</Authors>
+    <Description>Official Zenvio SDK for .NET — WhatsApp, SMS, Email, and Template messaging</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/zenvio/zenvio-sdk</RepositoryUrl>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

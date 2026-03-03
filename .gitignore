@@ -1,5 +1,59 @@
-node_modules
-dist
+## Node.js
+node_modules/
+dist/
+*.tsbuildinfo
+
+## Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+
+## Java
+target/
+*.class
+*.jar
+
+## Go
+vendor/
+
+## PHP
+vendor/
+
+## Elixir
+_build/
+deps/
+
+## .NET
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.nupkg
+*.snupkg
+*.user
+*.suo
+*.cache
+project.lock.json
+*.nuget.props
+*.nuget.targets
+.vs/
+
+## IDE
+.idea/
+.vscode/
+*.swp
+*~
+
+## OS
 .DS_Store
+Thumbs.db
+
+## Environment
 .env
+.env.*
+
+## Misc
 *.log
