@@ -63,6 +63,14 @@ type WhatsAppSendParams struct {
 	Options *struct {
 		Priority   string `json:"priority,omitempty"`
 		MaxRetries int    `json:"maxRetries,omitempty"`
+		Webhook    *struct {
+			URL    string `json:"url"`
+			Secret string `json:"secret,omitempty"`
+		} `json:"webhook,omitempty"`
+		AutoReplyText string `json:"autoReplyText,omitempty"`
+		Fallback      *struct {
+			Channel string `json:"channel"`
+		} `json:"fallback,omitempty"`
 	} `json:"options,omitempty"`
 }
 
@@ -284,7 +292,7 @@ type EmailCancelResponse struct {
 }
 
 // ========== Messages (templates) — POST /v1/templates/send ==========
-// Mesmos campos em todos os SDKs: to, template, variables, channels, instance_id, from, fromName.
+// Mesmos campos em todos os SDKs: to, template, variables, channels, instanceId, from, fromName.
 
 // MessagesSendParams — body para POST /v1/templates/send
 type MessagesSendParams struct {

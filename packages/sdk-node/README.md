@@ -24,6 +24,11 @@ await notifique.whatsapp.send(instanceId, {
   to: ['5511999999999'],
   type: 'text',
   payload: { message: 'Olá!' },
+  options: {
+    webhook: { url: 'https://seu-dominio.com/webhooks/notifique', secret: 'opcional' },
+    autoReplyText: 'Obrigado pela resposta! Já vamos te atender.',
+    fallback: { channel: 'sms' },
+  },
 });
 
 // Imagem

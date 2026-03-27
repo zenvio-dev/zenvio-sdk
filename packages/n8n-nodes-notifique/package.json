@@ -1,0 +1,55 @@
+{
+  "name": "n8n-nodes-notifique",
+  "version": "0.1.5",
+  "description": "n8n community node for Notifique",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "credentials",
+    "nodes/Notifique/Notifique.node.ts",
+    "nodes/Notifique/notifique.svg",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "notifique",
+    "whatsapp",
+    "sms",
+    "email",
+    "push"
+  ],
+  "author": "Matheus Sanches Miranda <sanchesmiranda.matheus@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/notifique-dev/notifique-sdk.git",
+    "directory": "packages/n8n-nodes-notifique"
+  },
+  "homepage": "https://github.com/notifique-dev/notifique-sdk/tree/main/packages/n8n-nodes-notifique",
+  "bugs": {
+    "url": "https://github.com/notifique-dev/notifique-sdk/issues"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "devDependencies": {
+    "n8n-workflow": "^1.82.0",
+    "typescript": "^5.0.0"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/NotifiqueApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Notifique/Notifique.node.js"
+    ]
+  }
+}

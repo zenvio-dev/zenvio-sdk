@@ -1,0 +1,64 @@
+{
+  "name": "Notifique - Falha de pagamento (SMS + Email + WhatsApp)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "payment-failure",
+        "httpMethod": "POST",
+        "responseMode": "onReceived"
+      },
+      "id": "Webhook_1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "templates",
+        "operation": "send",
+        "to": "={{$json.body.recipientsCsv}}",
+        "template": "payment_failed",
+        "channels": [
+          "whatsapp",
+          "sms",
+          "email"
+        ],
+        "instanceId": "={{$json.body.instanceId}}",
+        "from": "billing@seudominio.com",
+        "fromName": "Financeiro",
+        "variablesJson": "={\"customerName\":\"{{$json.body.customerName}}\",\"amount\":\"{{$json.body.amount}}\",\"invoice\":\"{{$json.body.invoice}}\"}"
+      },
+      "id": "Notifique_1",
+      "name": "Notifique Template",
+      "type": "n8n-nodes-notifique.notifiqueNode",
+      "typeVersion": 1,
+      "position": [
+        560,
+        300
+      ],
+      "credentials": {
+        "notifiqueApi": {
+          "id": "1",
+          "name": "Notifique API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Notifique Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

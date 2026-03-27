@@ -53,6 +53,11 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
       to: ['5511999999999'],
       type: 'text',
       payload: { message: 'Test message' },
+      options: {
+        webhook: { url: 'https://example.com/hook', secret: 's' },
+        autoReplyText: 'Obrigado!',
+        fallback: { channel: 'sms' },
+      },
     });
 
     expect(mockPost).toHaveBeenCalledWith(
@@ -62,6 +67,11 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
         to: ['5511999999999'],
         type: 'text',
         payload: { message: 'Test message' },
+        options: expect.objectContaining({
+          webhook: { url: 'https://example.com/hook', secret: 's' },
+          autoReplyText: 'Obrigado!',
+          fallback: { channel: 'sms' },
+        }),
       }),
       undefined
     );
@@ -228,7 +238,7 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
     expect(mockGet).toHaveBeenCalledWith('/whatsapp/instances/i1/qr');
     expect(result.success).toBe(true);
     expect(result.data.status).toBe('PENDING');
-    expect(result.data.qrcodeBase64).toBe('data:image/png;base64,...');
+    expect((result.data as any).base64).toBe('data:image/png;base64,...');
   });
 
   it('getInstance calls GET /whatsapp/instances/:id', async () => {
@@ -300,8 +310,8 @@ describe('Node.js SDK — Messages (template)', () => {
         success: true,
         data: {
           messageIds: ['msg-1'],
-          sms_ids: ['sms-1'],
-          email_ids: ['em-1'],
+          smsIds: ['sms-1'],
+          emailIds: ['em-1'],
           status: 'queued',
           count: 3,
         },

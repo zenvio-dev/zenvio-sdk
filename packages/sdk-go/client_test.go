@@ -68,6 +68,24 @@ func TestWhatsAppSendWithParams(t *testing.T) {
 		To:   []string{"5511888888888"},
 		Type: "text",
 		Payload: WhatsAppTextPayload{Message: "Hi"},
+		Options: &struct {
+			Priority   string `json:"priority,omitempty"`
+			MaxRetries int    `json:"maxRetries,omitempty"`
+			Webhook    *struct {
+				URL    string `json:"url"`
+				Secret string `json:"secret,omitempty"`
+			} `json:"webhook,omitempty"`
+			AutoReplyText string `json:"autoReplyText,omitempty"`
+			Fallback      *struct {
+				Channel string `json:"channel"`
+			} `json:"fallback,omitempty"`
+		}{
+			Priority:     "normal",
+			MaxRetries:   3,
+			Webhook:      &struct{ URL, Secret string }{URL: "https://example.com/hook", Secret: "s"},
+			AutoReplyText: "Obrigado!",
+			Fallback:     &struct{ Channel string }{Channel: "sms"},
+		},
 	}
 	resp, err := client.WhatsApp.Send("instance-1", params)
 	if err != nil {

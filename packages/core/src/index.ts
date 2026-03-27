@@ -108,6 +108,25 @@ export interface WhatsAppSendParams<T extends WhatsAppMessageType = WhatsAppMess
   options?: {
     priority?: 'high' | 'normal' | 'low';
     maxRetries?: number; // 0–5
+    /**
+     * Webhook dedicado por mensagem. Quando informado, TODOS os eventos desta mensagem
+     * serão entregues somente para esta URL (ignorando webhooks do workspace).
+     */
+    webhook?: {
+      url: string;
+      /** Opcional. Se omitido, o backend usa secret vazio. */
+      secret?: string;
+    };
+    /**
+     * Texto de resposta automática. Quando a mensagem for marcada como RESPONDED internamente,
+     * o backend enviará uma nova mensagem WhatsApp para o mesmo número com este texto (1x).
+     */
+    autoReplyText?: string;
+    /**
+     * Canal de fallback (máx. 1). Em falha final do WhatsApp, o backend tenta enviar pelo canal marcado.
+     * v1: apenas SMS é suportado.
+     */
+    fallback?: { channel: 'sms' };
   };
 }
 

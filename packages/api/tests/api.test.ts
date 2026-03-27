@@ -4,11 +4,12 @@ import request from 'supertest';
 const app = express();
 app.use(express.json());
 
-// Matches real API: POST /v1/whatsapp/messages (body: instance_id, to, type, payload)
+// Matches real API: POST /v1/whatsapp/messages (body: instanceId, to, type, payload)
 app.post('/v1/whatsapp/messages', (req, res) => {
-  const { instance_id, to, type, payload } = req.body;
+  const instanceId = req.body.instanceId ?? req.body.instance_id;
+  const { to, type, payload } = req.body;
 
-  if (!instance_id || !to || !type || !payload) {
+  if (!instanceId || !to || !type || !payload) {
     return res.status(400).json({ success: false, error: 'Missing required fields' });
   }
 

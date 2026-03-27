@@ -85,12 +85,12 @@ describe('Core Type Contracts — SMS (OpenAPI SendSmsRequest / SendSmsResponse)
   it('SmsSendResponse.data.status is QUEUED | SCHEDULED', () => {
     const res: SmsSendResponse = {
       success: true,
-      data: { status: 'QUEUED', count: 1, sms_ids: ['sms-1'] },
+      data: { status: 'QUEUED', count: 1, smsIds: ['sms-1'] },
     };
     expect(res.data.status).toBe('QUEUED');
     const scheduled: SmsSendResponse = {
       success: true,
-      data: { status: 'SCHEDULED', count: 1, sms_ids: ['sms-1'], scheduled_at: '2025-12-31T14:00:00.000Z' },
+      data: { status: 'SCHEDULED', count: 1, smsIds: ['sms-1'], scheduledAt: '2025-12-31T14:00:00.000Z' },
     };
     expect(scheduled.data.status).toBe('SCHEDULED');
   });
@@ -99,22 +99,22 @@ describe('Core Type Contracts — SMS (OpenAPI SendSmsRequest / SendSmsResponse)
     const statusRes: SmsStatusResponse = {
       success: true,
       data: {
-        sms_id: 's1',
+        smsId: 's1',
         to: '5511999999999',
         message: 'Hi',
         status: 'DELIVERED',
-        sent_at: '2025-01-01T12:00:00.000Z',
-        delivered_at: '2025-01-01T12:00:05.000Z',
-        failed_at: null,
-        scheduled_for: null,
-        error_message: null,
-        created_at: '2025-01-01T11:59:00.000Z',
+        sentAt: '2025-01-01T12:00:00.000Z',
+        deliveredAt: '2025-01-01T12:00:05.000Z',
+        failedAt: null,
+        scheduledFor: null,
+        errorMessage: null,
+        createdAt: '2025-01-01T11:59:00.000Z',
       },
     };
     expect(statusRes.data.status).toBe('DELIVERED');
     const cancelRes: SmsCancelResponse = {
       success: true,
-      data: { sms_id: 's1', status: 'CANCELLED' },
+      data: { smsId: 's1', status: 'CANCELLED' },
     };
     expect(cancelRes.data.status).toBe('CANCELLED');
   });
@@ -136,7 +136,7 @@ describe('Core Type Contracts — Email (OpenAPI SendEmailRequest / responses)',
   it('EmailSendResponse.data.status is QUEUED | SCHEDULED', () => {
     const res: EmailSendResponse = {
       success: true,
-      data: { email_ids: ['em-1'], status: 'QUEUED', count: 1 },
+      data: { emailIds: ['em-1'], status: 'QUEUED', count: 1 },
     };
     expect(res.data.status).toBe('QUEUED');
   });
@@ -162,7 +162,7 @@ describe('Core Type Contracts — Email (OpenAPI SendEmailRequest / responses)',
     expect(statusRes.data.status).toBe('SENT');
     const cancelRes: EmailCancelResponse = {
       success: true,
-      data: { email_id: 'em-1', status: 'CANCELLED' },
+      data: { emailId: 'em-1', status: 'CANCELLED' },
     };
     expect(cancelRes.data.status).toBe('CANCELLED');
   });
@@ -210,7 +210,7 @@ describe('Core Type Contracts — Push (OpenAPI SendPushRequest / responses)', (
       page: 1,
       limit: 20,
       status: 'SENT' as PushMessageStatus,
-      app_id: 'app-1',
+      appId: 'app-1',
     };
     expect(params.status).toBe('SENT');
   });
@@ -218,7 +218,7 @@ describe('Core Type Contracts — Push (OpenAPI SendPushRequest / responses)', (
   it('CancelPushResponse.data.status is CANCELLED', () => {
     const res: CancelPushResponse = {
       success: true,
-      data: { push_id: 'push-1', status: 'CANCELLED' },
+      data: { pushId: 'push-1', status: 'CANCELLED' },
     };
     expect(res.data.status).toBe('CANCELLED');
   });

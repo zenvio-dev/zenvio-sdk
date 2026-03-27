@@ -11,6 +11,7 @@ Todos os SDKs usam por padrão a base URL `https://api.notifique.dev/v1` e segue
 | Linguagem | Pacote | Status |
 | :--- | :--- | :--- |
 | **Node.js** | `@notifique/core`, `@notifique/sdk-node` | ✅ Estável |
+| **n8n** | `n8n-nodes-notifique` | ✅ Estável |
 | **Python** | `notifique-sdk` (classe `Notifique`) | ✅ Estável |
 | **Java** | `com.notifique.sdk` (classe `Notifique`) | ✅ Estável |
 | **Go** | `github.com/notifique/notifique-sdk-go` (pacote `notifique`) | ✅ Estável |
@@ -110,6 +111,7 @@ Every SDK in this repository undergoes rigorous automated testing:
 For detailed installation and usage instructions, please refer to the individual package directories:
 
 - [Node.js SDK](./packages/sdk-node)
+- [n8n Node](./packages/n8n-nodes-notifique)
 - [Python SDK](./packages/sdk-python)
 - [Java SDK](./packages/sdk-java)
 - [Go SDK](./packages/sdk-go)

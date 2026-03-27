@@ -1,0 +1,56 @@
+{
+  "name": "Notifique - Webhook para WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "notifique-whatsapp",
+        "httpMethod": "POST",
+        "responseMode": "onReceived"
+      },
+      "id": "Webhook_1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "whatsapp",
+        "operation": "sendText",
+        "instanceId": "={{$json.body.instanceId}}",
+        "to": "={{$json.body.to}}",
+        "message": "={{$json.body.message}}"
+      },
+      "id": "Notifique_1",
+      "name": "Notifique WhatsApp",
+      "type": "n8n-nodes-notifique.notifiqueNode",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ],
+      "credentials": {
+        "notifiqueApi": {
+          "id": "1",
+          "name": "Notifique API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Notifique WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
