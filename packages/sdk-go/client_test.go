@@ -25,7 +25,7 @@ func TestWhatsAppSendText(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "test-key", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "test-key", BaseURL: server.URL, AllowInsecureHTTP: true})
 	resp, err := client.WhatsApp.SendText("instance-1", []string{"5511999999999"}, "Hello")
 	if err != nil {
 		t.Fatalf("SendText: %v", err)
@@ -42,7 +42,7 @@ func TestWhatsAppSendError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	_, err := client.WhatsApp.SendText("x", []string{"123"}, "hi")
 	if err == nil {
 		t.Fatal("expected APIError")
@@ -63,7 +63,7 @@ func TestWhatsAppSendWithParams(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	params := WhatsAppSendParams{
 		To:   []string{"5511888888888"},
 		Type: "text",
@@ -108,7 +108,7 @@ func TestIdempotencyKeyHeader(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	opts := &SendOptions{IdempotencyKey: "my-key-123"}
 	_, err := client.WhatsApp.SendText("inst-1", []string{"5511999999999"}, "Hi", opts)
 	if err != nil {
@@ -129,7 +129,7 @@ func TestWhatsAppGetMessage(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	envelope, err := client.WhatsApp.GetMessage("msg-1")
 	if err != nil {
 		t.Fatal(err)
@@ -150,7 +150,7 @@ func TestWhatsAppListInstances(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	list, err := client.WhatsApp.ListInstances(nil)
 	if err != nil {
 		t.Fatal(err)
@@ -175,7 +175,7 @@ func TestSmsSend(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	resp, err := client.SMS.Send(SmsSendParams{To: []string{"5511999999999"}, Message: "Test"})
 	if err != nil {
 		t.Fatal(err)
@@ -195,7 +195,7 @@ func TestSmsGet(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	resp, err := client.SMS.Get("sms-1")
 	if err != nil {
 		t.Fatal(err)
@@ -219,7 +219,7 @@ func TestSmsCancel(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	resp, err := client.SMS.Cancel("sms-1")
 	if err != nil {
 		t.Fatal(err)
@@ -239,7 +239,7 @@ func TestEmailSend(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	resp, err := client.Email.Send(EmailSendParams{
 		From: "noreply@example.com", To: []string{"u@example.com"},
 		Subject: "Test", Text: "Body",
@@ -262,7 +262,7 @@ func TestEmailCancel(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	resp, err := client.Email.Cancel("email-1")
 	if err != nil {
 		t.Fatal(err)
@@ -287,7 +287,7 @@ func TestMessagesSend(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL})
+	client, _ := NewClientWithConfig(Config{APIKey: "k", BaseURL: server.URL, AllowInsecureHTTP: true})
 	resp, err := client.Messages.Send(MessagesSendParams{
 		To: []string{"5511999999999"}, Template: "welcome",
 		Variables: map[string]interface{}{"name": "User"},

@@ -2,6 +2,11 @@
 node_modules/
 dist/
 *.tsbuildinfo
+# Compiled JS/declarations — prevent stale artifacts from shadowing TypeScript sources in Jest/bundlers
+packages/*/src/*.js
+packages/*/src/*.d.ts
+packages/*/tests/*.js
+examples/*/src/*.js
 
 ## Python
 __pycache__/
@@ -57,3 +62,6 @@ Thumbs.db
 
 ## Misc
 *.log
+
+# Java compiled artifacts (also contained old 'zenvio' brand classes — removed in security audit)
+packages/sdk-java/target/

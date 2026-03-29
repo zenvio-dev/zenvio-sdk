@@ -3,13 +3,17 @@ package main
 import (
 	"fmt"
 	"github.com/notifique/notifique-sdk-go"
+	"os"
 )
 
 func main() {
-	client := notifique.NewClient("your_api_key_here")
-
-	phoneID := "your_phone_id_here"
-	recipient := "5511999999999"
+	apiKey := os.Getenv("NOTIFIQUE_API_KEY")
+	phoneID := os.Getenv("NOTIFIQUE_INSTANCE_ID")
+	recipient := os.Getenv("MY_PHONE")
+	if apiKey == "" || phoneID == "" || recipient == "" {
+		panic("set NOTIFIQUE_API_KEY, NOTIFIQUE_INSTANCE_ID and MY_PHONE before running this example")
+	}
+	client := notifique.NewClient(apiKey)
 
 	fmt.Println("--- Notifique Go SDK Example ---")
 

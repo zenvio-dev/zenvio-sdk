@@ -8,7 +8,7 @@ public class NotifiqueApiException extends RuntimeException {
     private final String responseBody;
 
     public NotifiqueApiException(int statusCode, String responseBody) {
-        super("Notifique API error: " + statusCode + " " + responseBody);
+        super("Notifique API error: " + statusCode);
         this.statusCode = statusCode;
         this.responseBody = responseBody;
     }

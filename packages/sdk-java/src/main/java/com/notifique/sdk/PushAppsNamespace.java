@@ -29,7 +29,7 @@ public class PushAppsNamespace {
     }
 
     public PushAppSingleResponse get(String appId) {
-        return client.request("GET", "/push/apps/" + appId, null, PushAppSingleResponse.class);
+        return client.request("GET", "/push/apps/" + Notifique.encodePathSegment(appId), null, PushAppSingleResponse.class);
     }
 
     public PushAppSingleResponse create(String name) {
@@ -37,10 +37,10 @@ public class PushAppsNamespace {
     }
 
     public PushAppSingleResponse update(String appId, Map<String, Object> params) {
-        return client.request("PUT", "/push/apps/" + appId, params, PushAppSingleResponse.class);
+        return client.request("PUT", "/push/apps/" + Notifique.encodePathSegment(appId), params, PushAppSingleResponse.class);
     }
 
     public void delete(String appId) {
-        client.request("DELETE", "/push/apps/" + appId, null, Void.class);
+        client.request("DELETE", "/push/apps/" + Notifique.encodePathSegment(appId), null, Void.class);
     }
 }

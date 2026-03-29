@@ -19,7 +19,12 @@ import (
 )
 
 func main() {
-	client := notifique.NewClient("sua-api-key") // baseUrl padrão: https://api.notifique.dev/v1
+	// NewClient panics on empty key; use NewClientWithConfig for error-returning variant.
+	client := notifique.NewClient("your-api-key") // default base URL: https://api.notifique.dev/v1
+
+	// Or with explicit error handling:
+	// client, err := notifique.NewClientWithConfig(notifique.Config{APIKey: "...", BaseURL: "..."})
+	// if err != nil { log.Fatal(err) }
 	instanceID := "sua-instancia-whatsapp"
 	to := []string{"5511999999999"}
 
@@ -67,4 +72,5 @@ func main() {
 
 - `notifique.Client` é alias de `notifique.Notifique`; `NewClient` retorna `*Notifique`.
 - Em 4xx/5xx o SDK retorna `*notifique.APIError` com `Code` e `Body`.
+- `NewClientWithConfig` exige `BaseURL` HTTPS por padrão (`AllowInsecureHTTP` existe apenas para cenários controlados de teste/local).
 - Go 1.20+

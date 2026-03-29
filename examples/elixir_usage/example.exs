@@ -1,8 +1,14 @@
 # Notifique SDK Example em Elixir
 
-client = Notifique.new("your_api_key_here")
-phone_id = "your_phone_id_here"
-recipient = "5511999999999"
+api_key = System.get_env("NOTIFIQUE_API_KEY")
+phone_id = System.get_env("NOTIFIQUE_INSTANCE_ID")
+recipient = System.get_env("MY_PHONE")
+
+if is_nil(api_key) or is_nil(phone_id) or is_nil(recipient) do
+  raise "Set NOTIFIQUE_API_KEY, NOTIFIQUE_INSTANCE_ID and MY_PHONE before running this example."
+end
+
+client = Notifique.new(api_key)
 
 IO.puts("--- Notifique Elixir SDK Example ---")
 

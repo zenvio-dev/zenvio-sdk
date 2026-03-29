@@ -2,14 +2,20 @@
 Exemplo de uso do Notifique SDK para Python — WhatsApp, SMS, Email e template.
 """
 
+import os
+
 from notifique import Notifique, NotifiqueApiError
 
 
 def main():
-    notifique = Notifique(api_key="your_api_key_here")
-    instance_id = "your_instance_id_here"
-    phone = "5511999999999"
-    email = "user@example.com"
+    api_key = os.getenv("NOTIFIQUE_API_KEY")
+    instance_id = os.getenv("NOTIFIQUE_INSTANCE_ID")
+    phone = os.getenv("MY_PHONE")
+    email = os.getenv("MY_EMAIL")
+    if not api_key or not instance_id or not phone or not email:
+        raise RuntimeError("Set NOTIFIQUE_API_KEY, NOTIFIQUE_INSTANCE_ID, MY_PHONE and MY_EMAIL before running this example.")
+
+    notifique = Notifique(api_key=api_key)
 
     print("--- Notifique Python SDK ---")
 

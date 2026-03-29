@@ -357,7 +357,9 @@ def test_messages_send():
 
 # ----- Errors -----
 
-def test_api_error_raises():
+def test_api_error_raises_notifique_error():
+    """4xx/5xx responses raise NotifiqueApiError, not requests.HTTPError."""
+    from notifique import NotifiqueApiError
     with requests_mock.Mocker() as m:
         m.post(
             f"{BASE_URL}/whatsapp/messages",
@@ -365,6 +367,45 @@ def test_api_error_raises():
             status_code=401,
         )
         client = Notifique(api_key="wrong-key")
-        with pytest.raises(requests.HTTPError) as exc_info:
+        with pytest.raises(NotifiqueApiError) as exc_info:
             client.whatsapp.send("inst", {"to": ["1"], "type": "text", "payload": {"message": "x"}})
-        assert exc_info.value.response.status_code == 401
+        assert exc_info.value.status_code == 401
+        assert "Invalid API Key" in str(exc_info.value)
+
+
+def test_api_error_with_details():
+    """Details array is concatenated into the error message."""
+    from notifique import NotifiqueApiError
+    with requests_mock.Mocker() as m:
+        m.post(
+            f"{BASE_URL}/sms/messages",
+            json={
+                "message": "Validation error",
+                "success": False,
+                "details": [
+                    {"field": "to", "message": "must be E.164 format"},
+                    {"field": "message", "message": "too long"},
+                ],
+            },
+            status_code=422,
+        )
+        client = Notifique(api_key="test-key")
+        with pytest.raises(NotifiqueApiError) as exc_info:
+            client.sms.send({"to": ["not-a-number"], "message": "x" * 200})
+        assert exc_info.value.status_code == 422
+        assert "to:" in str(exc_info.value)
+
+
+def test_constructor_validates_api_key():
+    """Empty or missing api_key raises ValueError at construction time."""
+    with pytest.raises(ValueError):
+        Notifique(api_key="")
+    with pytest.raises(ValueError):
+        Notifique(api_key="   ")
+    with pytest.raises((ValueError, TypeError)):
+        Notifique(api_key=None)  # type: ignore
+
+
+def test_constructor_rejects_non_https_base_url():
+    with pytest.raises(ValueError):
+        Notifique(api_key="key", base_url="http://localhost:3000/v1")

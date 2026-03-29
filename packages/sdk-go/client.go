@@ -47,24 +47,41 @@ type Client = Notifique
 
 // Config configuração do cliente.
 type Config struct {
-	APIKey  string
-	BaseURL string
+	APIKey            string
+	BaseURL           string
+	AllowInsecureHTTP bool
 }
 
-// NewClient cria um novo cliente com a URL padrão (https://api.notifique.dev/v1).
+// NewClient creates a client with the default base URL (https://api.notifique.dev/v1).
+// Panics if apiKey is empty — use NewClientWithConfig to handle the error explicitly.
 func NewClient(apiKey string) *Notifique {
-	return NewClientWithConfig(Config{
+	c, err := NewClientWithConfig(Config{
 		APIKey:  apiKey,
 		BaseURL: "https://api.notifique.dev/v1",
 	})
+	if err != nil {
+		panic(err)
+	}
+	return c
 }
 
-// NewClientWithConfig cria um cliente com configuração customizada.
-func NewClientWithConfig(config Config) *Notifique {
+// NewClientWithConfig creates a client with a custom configuration.
+// Returns nil and a non-nil error if config.APIKey is empty.
+func NewClientWithConfig(config Config) (*Notifique, error) {
+	if strings.TrimSpace(config.APIKey) == "" {
+		return nil, fmt.Errorf("notifique: APIKey must not be empty")
+	}
 	if config.BaseURL == "" {
 		config.BaseURL = "https://api.notifique.dev/v1"
 	}
 	config.BaseURL = strings.TrimSuffix(config.BaseURL, "/")
+	parsedURL, err := url.Parse(config.BaseURL)
+	if err != nil || parsedURL.Host == "" {
+		return nil, fmt.Errorf("notifique: BaseURL must be an absolute URL")
+	}
+	if parsedURL.Scheme != "https" && !config.AllowInsecureHTTP {
+		return nil, fmt.Errorf("notifique: BaseURL must be HTTPS")
+	}
 	c := &Notifique{
 		APIKey:  config.APIKey,
 		BaseURL: config.BaseURL,
@@ -77,12 +94,24 @@ func NewClientWithConfig(config Config) *Notifique {
 	c.Email = &EmailNamespace{client: c}
 	c.Messages = &MessagesNamespace{client: c}
 	c.Push = newPushNamespace(c)
-	return c
+	return c, nil
 }
 
 // SendOptions opções para requisições de envio (Email, SMS, Push, WhatsApp). IdempotencyKey envia o header Idempotency-Key (e x-idempotency-key) conforme OpenAPI.
 type SendOptions struct {
 	IdempotencyKey string
+}
+
+// buildQueryPath appends a query string to path from a params map. Returns path unchanged if params is empty.
+func buildQueryPath(base string, params map[string]string) string {
+	if len(params) == 0 {
+		return base
+	}
+	q := url.Values{}
+	for k, v := range params {
+		q.Set(k, v)
+	}
+	return base + "?" + q.Encode()
 }
 
 // request executa a requisição HTTP. Se status >= 400, retorna *APIError. Se result != nil, decodifica o body em result.
@@ -176,14 +205,7 @@ func (w *WhatsAppNamespace) SendText(instanceID string, to []string, text string
 
 // ListMessages GET /v1/whatsapp/messages (params: page, limit, fromDate, toDate, instanceIds, status, type, includeEvents)
 func (w *WhatsAppNamespace) ListMessages(params map[string]string) (*WhatsAppListMessagesResponse, error) {
-	path := "/whatsapp/messages"
-	if len(params) > 0 {
-		q := url.Values{}
-		for k, v := range params {
-			q.Set(k, v)
-		}
-		path = path + "?" + q.Encode()
-	}
+	path := buildQueryPath("/whatsapp/messages", params)
 	var res WhatsAppListMessagesResponse
 	if err := w.client.request("GET", path, nil, &res); err != nil {
 		return nil, err
@@ -194,7 +216,7 @@ func (w *WhatsAppNamespace) ListMessages(params map[string]string) (*WhatsAppLis
 // GetMessage GET /v1/whatsapp/messages/:messageId — retorna envelope success/data.
 func (w *WhatsAppNamespace) GetMessage(messageID string) (*WhatsAppMessageEnvelope, error) {
 	var res WhatsAppMessageEnvelope
-	if err := w.client.request("GET", "/whatsapp/messages/"+messageID, nil, &res); err != nil {
+	if err := w.client.request("GET", "/whatsapp/messages/"+url.PathEscape(messageID), nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -203,7 +225,7 @@ func (w *WhatsAppNamespace) GetMessage(messageID string) (*WhatsAppMessageEnvelo
 // GetInstanceQr GET /v1/whatsapp/instances/:instanceId/qr
 func (w *WhatsAppNamespace) GetInstanceQr(instanceID string) (*WhatsAppInstanceQrResponse, error) {
 	var res WhatsAppInstanceQrResponse
-	if err := w.client.request("GET", "/whatsapp/instances/"+instanceID+"/qr", nil, &res); err != nil {
+	if err := w.client.request("GET", "/whatsapp/instances/"+url.PathEscape(instanceID)+"/qr", nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -212,7 +234,7 @@ func (w *WhatsAppNamespace) GetInstanceQr(instanceID string) (*WhatsAppInstanceQ
 // DeleteMessage DELETE /v1/whatsapp/messages/:messageId
 func (w *WhatsAppNamespace) DeleteMessage(messageID string) (*WhatsAppMessageActionResponse, error) {
 	var res WhatsAppMessageActionResponse
-	if err := w.client.request("DELETE", "/whatsapp/messages/"+messageID, nil, &res); err != nil {
+	if err := w.client.request("DELETE", "/whatsapp/messages/"+url.PathEscape(messageID), nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -222,7 +244,7 @@ func (w *WhatsAppNamespace) DeleteMessage(messageID string) (*WhatsAppMessageAct
 func (w *WhatsAppNamespace) EditMessage(messageID string, text string) (*WhatsAppMessageActionResponse, error) {
 	var res WhatsAppMessageActionResponse
 	body := map[string]string{"text": text}
-	if err := w.client.request("PATCH", "/whatsapp/messages/"+messageID+"/edit", body, &res); err != nil {
+	if err := w.client.request("PATCH", "/whatsapp/messages/"+url.PathEscape(messageID)+"/edit", body, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -231,7 +253,7 @@ func (w *WhatsAppNamespace) EditMessage(messageID string, text string) (*WhatsAp
 // CancelMessage POST /v1/whatsapp/messages/:messageId/cancel
 func (w *WhatsAppNamespace) CancelMessage(messageID string) (*WhatsAppMessageActionResponse, error) {
 	var res WhatsAppMessageActionResponse
-	if err := w.client.request("POST", "/whatsapp/messages/"+messageID+"/cancel", nil, &res); err != nil {
+	if err := w.client.request("POST", "/whatsapp/messages/"+url.PathEscape(messageID)+"/cancel", nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -239,14 +261,7 @@ func (w *WhatsAppNamespace) CancelMessage(messageID string) (*WhatsAppMessageAct
 
 // ListInstances GET /v1/whatsapp/instances (params opcional: page, limit, status, search)
 func (w *WhatsAppNamespace) ListInstances(params map[string]string) (*WhatsAppInstanceListResponse, error) {
-	path := "/whatsapp/instances"
-	if len(params) > 0 {
-		q := url.Values{}
-		for k, v := range params {
-			q.Set(k, v)
-		}
-		path = path + "?" + q.Encode()
-	}
+	path := buildQueryPath("/whatsapp/instances", params)
 	var res WhatsAppInstanceListResponse
 	if err := w.client.request("GET", path, nil, &res); err != nil {
 		return nil, err
@@ -257,7 +272,7 @@ func (w *WhatsAppNamespace) ListInstances(params map[string]string) (*WhatsAppIn
 // GetInstance GET /v1/whatsapp/instances/:instanceId
 func (w *WhatsAppNamespace) GetInstance(instanceID string) (*WhatsAppInstanceResponse, error) {
 	var res WhatsAppInstanceResponse
-	if err := w.client.request("GET", "/whatsapp/instances/"+instanceID, nil, &res); err != nil {
+	if err := w.client.request("GET", "/whatsapp/instances/"+url.PathEscape(instanceID), nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -276,7 +291,7 @@ func (w *WhatsAppNamespace) CreateInstance(name string) (*WhatsAppCreateInstance
 // DisconnectInstance POST /v1/whatsapp/instances/:instanceId/disconnect
 func (w *WhatsAppNamespace) DisconnectInstance(instanceID string) (*WhatsAppInstanceActionResponse, error) {
 	var res WhatsAppInstanceActionResponse
-	if err := w.client.request("POST", "/whatsapp/instances/"+instanceID+"/disconnect", nil, &res); err != nil {
+	if err := w.client.request("POST", "/whatsapp/instances/"+url.PathEscape(instanceID)+"/disconnect", nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -285,7 +300,7 @@ func (w *WhatsAppNamespace) DisconnectInstance(instanceID string) (*WhatsAppInst
 // DeleteInstance DELETE /v1/whatsapp/instances/:instanceId
 func (w *WhatsAppNamespace) DeleteInstance(instanceID string) (*WhatsAppInstanceActionResponse, error) {
 	var res WhatsAppInstanceActionResponse
-	if err := w.client.request("DELETE", "/whatsapp/instances/"+instanceID, nil, &res); err != nil {
+	if err := w.client.request("DELETE", "/whatsapp/instances/"+url.PathEscape(instanceID), nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -314,7 +329,7 @@ func (s *SmsNamespace) Send(params SmsSendParams, opts ...*SendOptions) (*SmsSen
 // Get GET /v1/sms/messages/:id
 func (s *SmsNamespace) Get(id string) (*SmsStatusResponse, error) {
 	var res SmsStatusResponse
-	if err := s.client.request("GET", "/sms/messages/"+id, nil, &res); err != nil {
+	if err := s.client.request("GET", "/sms/messages/"+url.PathEscape(id), nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -323,7 +338,7 @@ func (s *SmsNamespace) Get(id string) (*SmsStatusResponse, error) {
 // Cancel POST /v1/sms/messages/:id/cancel — cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel.
 func (s *SmsNamespace) Cancel(id string) (*SmsCancelResponse, error) {
 	var res SmsCancelResponse
-	if err := s.client.request("POST", "/sms/messages/"+id+"/cancel", nil, &res); err != nil {
+	if err := s.client.request("POST", "/sms/messages/"+url.PathEscape(id)+"/cancel", nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -352,7 +367,7 @@ func (e *EmailNamespace) Send(params EmailSendParams, opts ...*SendOptions) (*Em
 // Get GET /v1/email/messages/:id
 func (e *EmailNamespace) Get(id string) (*EmailStatusResponse, error) {
 	var res EmailStatusResponse
-	if err := e.client.request("GET", "/email/messages/"+id, nil, &res); err != nil {
+	if err := e.client.request("GET", "/email/messages/"+url.PathEscape(id), nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -361,7 +376,7 @@ func (e *EmailNamespace) Get(id string) (*EmailStatusResponse, error) {
 // Cancel POST /v1/email/messages/:id/cancel
 func (e *EmailNamespace) Cancel(id string) (*EmailCancelResponse, error) {
 	var res EmailCancelResponse
-	if err := e.client.request("POST", "/email/messages/"+id+"/cancel", nil, &res); err != nil {
+	if err := e.client.request("POST", "/email/messages/"+url.PathEscape(id)+"/cancel", nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -400,7 +415,7 @@ func (d *EmailDomainsNamespace) Create(req CreateEmailDomainRequest) (*CreateEma
 // Get GET /v1/email/domains/:id
 func (d *EmailDomainsNamespace) Get(id string) (*GetEmailDomainResponse, error) {
 	var res GetEmailDomainResponse
-	if err := d.client.request("GET", "/email/domains/"+id, nil, &res); err != nil {
+	if err := d.client.request("GET", "/email/domains/"+url.PathEscape(id), nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -409,7 +424,7 @@ func (d *EmailDomainsNamespace) Get(id string) (*GetEmailDomainResponse, error) 
 // Verify POST /v1/email/domains/:id/verify
 func (d *EmailDomainsNamespace) Verify(id string) (*VerifyEmailDomainResponse, error) {
 	var res VerifyEmailDomainResponse
-	if err := d.client.request("POST", "/email/domains/"+id+"/verify", nil, &res); err != nil {
+	if err := d.client.request("POST", "/email/domains/"+url.PathEscape(id)+"/verify", nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -440,14 +455,7 @@ type PushAppsNamespace struct {
 
 // List GET /v1/push/apps
 func (p *PushAppsNamespace) List(params map[string]string) (*PushAppListResponse, error) {
-	path := "/push/apps"
-	if len(params) > 0 {
-		q := url.Values{}
-		for k, v := range params {
-			q.Set(k, v)
-		}
-		path = path + "?" + q.Encode()
-	}
+	path := buildQueryPath("/push/apps", params)
 	var res PushAppListResponse
 	if err := p.client.request("GET", path, nil, &res); err != nil {
 		return nil, err
@@ -458,7 +466,7 @@ func (p *PushAppsNamespace) List(params map[string]string) (*PushAppListResponse
 // Get GET /v1/push/apps/:id
 func (p *PushAppsNamespace) Get(id string) (*PushAppSingleResponse, error) {
 	var res PushAppSingleResponse
-	if err := p.client.request("GET", "/push/apps/"+id, nil, &res); err != nil {
+	if err := p.client.request("GET", "/push/apps/"+url.PathEscape(id), nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -477,7 +485,7 @@ func (p *PushAppsNamespace) Create(name string) (*PushAppSingleResponse, error) 
 // Update PUT /v1/push/apps/:id
 func (p *PushAppsNamespace) Update(id string, body map[string]interface{}) (*PushAppSingleResponse, error) {
 	var res PushAppSingleResponse
-	if err := p.client.request("PUT", "/push/apps/"+id, body, &res); err != nil {
+	if err := p.client.request("PUT", "/push/apps/"+url.PathEscape(id), body, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -485,7 +493,7 @@ func (p *PushAppsNamespace) Update(id string, body map[string]interface{}) (*Pus
 
 // Delete DELETE /v1/push/apps/:id
 func (p *PushAppsNamespace) Delete(id string) error {
-	return p.client.request("DELETE", "/push/apps/"+id, nil, nil)
+	return p.client.request("DELETE", "/push/apps/"+url.PathEscape(id), nil, nil)
 }
 
 // PushDevicesNamespace POST/GET /v1/push/devices, GET/DELETE /v1/push/devices/:id
@@ -504,14 +512,7 @@ func (p *PushDevicesNamespace) Register(params PushDeviceRegisterRequest) (*Push
 
 // List GET /v1/push/devices
 func (p *PushDevicesNamespace) List(params map[string]string) (*PushDeviceListResponse, error) {
-	path := "/push/devices"
-	if len(params) > 0 {
-		q := url.Values{}
-		for k, v := range params {
-			q.Set(k, v)
-		}
-		path = path + "?" + q.Encode()
-	}
+	path := buildQueryPath("/push/devices", params)
 	var res PushDeviceListResponse
 	if err := p.client.request("GET", path, nil, &res); err != nil {
 		return nil, err
@@ -522,7 +523,7 @@ func (p *PushDevicesNamespace) List(params map[string]string) (*PushDeviceListRe
 // Get GET /v1/push/devices/:id
 func (p *PushDevicesNamespace) Get(id string) (*PushDeviceSingleResponse, error) {
 	var res PushDeviceSingleResponse
-	if err := p.client.request("GET", "/push/devices/"+id, nil, &res); err != nil {
+	if err := p.client.request("GET", "/push/devices/"+url.PathEscape(id), nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -530,7 +531,7 @@ func (p *PushDevicesNamespace) Get(id string) (*PushDeviceSingleResponse, error)
 
 // Delete DELETE /v1/push/devices/:id
 func (p *PushDevicesNamespace) Delete(id string) error {
-	return p.client.request("DELETE", "/push/devices/"+id, nil, nil)
+	return p.client.request("DELETE", "/push/devices/"+url.PathEscape(id), nil, nil)
 }
 
 // PushMessagesNamespace POST/GET /v1/push/messages, GET /v1/push/messages/:id, POST cancel
@@ -553,14 +554,7 @@ func (p *PushMessagesNamespace) Send(params SendPushParams, opts ...*SendOptions
 
 // List GET /v1/push/messages
 func (p *PushMessagesNamespace) List(params map[string]string) (*PushMessageListResponse, error) {
-	path := "/push/messages"
-	if len(params) > 0 {
-		q := url.Values{}
-		for k, v := range params {
-			q.Set(k, v)
-		}
-		path = path + "?" + q.Encode()
-	}
+	path := buildQueryPath("/push/messages", params)
 	var res PushMessageListResponse
 	if err := p.client.request("GET", path, nil, &res); err != nil {
 		return nil, err
@@ -571,7 +565,7 @@ func (p *PushMessagesNamespace) List(params map[string]string) (*PushMessageList
 // Get GET /v1/push/messages/:id
 func (p *PushMessagesNamespace) Get(id string) (*PushMessageSingleResponse, error) {
 	var res PushMessageSingleResponse
-	if err := p.client.request("GET", "/push/messages/"+id, nil, &res); err != nil {
+	if err := p.client.request("GET", "/push/messages/"+url.PathEscape(id), nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -580,7 +574,7 @@ func (p *PushMessagesNamespace) Get(id string) (*PushMessageSingleResponse, erro
 // Cancel POST /v1/push/messages/:id/cancel
 func (p *PushMessagesNamespace) Cancel(id string) (*CancelPushResponse, error) {
 	var res CancelPushResponse
-	if err := p.client.request("POST", "/push/messages/"+id+"/cancel", nil, &res); err != nil {
+	if err := p.client.request("POST", "/push/messages/"+url.PathEscape(id)+"/cancel", nil, &res); err != nil {
 		return nil, err
 	}
 	return &res, nil

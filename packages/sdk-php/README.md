@@ -22,8 +22,8 @@ $instanceId = 'sua-instancia-whatsapp';
 
 try {
     $resp = $notifique->whatsapp->sendText($instanceId, ['5511999999999'], 'Olá!');
-    // API retorna envelope: $resp['success'], $resp['data']['message_ids']
-    print_r($resp['data']['message_ids']);
+    // API retorna envelope: $resp['success'], $resp['data']['messageIds']
+    print_r($resp['data']['messageIds']);
 } catch (NotifiqueApiException $e) {
     echo "API erro {$e->statusCode}: {$e->responseBody}";
 }

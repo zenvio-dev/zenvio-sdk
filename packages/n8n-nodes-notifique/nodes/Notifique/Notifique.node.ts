@@ -41,6 +41,22 @@ function normalizeError(error: unknown): JsonRecord {
   return { message: String(error) };
 }
 
+function assertSecureBaseUrl(baseUrl: string): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(baseUrl);
+  } catch {
+    throw new Error('Base URL must be a valid absolute URL');
+  }
+  if (parsed.protocol !== 'https:') {
+    throw new Error('Base URL must use HTTPS');
+  }
+}
+
+function pathSegment(value: string): string {
+  return encodeURIComponent(value);
+}
+
 export class NotifiqueNode implements INodeType {
   description: INodeTypeDescription = {
     displayName: 'Notifique',
@@ -417,6 +433,10 @@ export class NotifiqueNode implements INodeType {
         const credentials = await this.getCredentials('notifiqueApi', i);
         const apiKey = String(credentials.apiKey ?? '');
         const baseUrl = String(credentials.baseUrl ?? 'https://api.notifique.dev/v1').replace(/\/$/, '');
+        if (!apiKey.trim()) {
+          throw new NodeOperationError(this.getNode(), 'API Key must be a non-empty string.', { itemIndex: i });
+        }
+        assertSecureBaseUrl(baseUrl);
 
         const apiRequest = async (
           method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
@@ -429,6 +449,7 @@ export class NotifiqueNode implements INodeType {
             method,
             url: `${baseUrl}${path}`,
             json: true,
+            timeout: 30000,
             headers: {
               Authorization: `Bearer ${apiKey}`,
               'Content-Type': 'application/json',
@@ -479,17 +500,17 @@ export class NotifiqueNode implements INodeType {
             response = await apiRequest('GET', '/whatsapp/messages', undefined, params);
           } else if (operation === 'getMessage') {
             const messageId = this.getNodeParameter('messageId', i) as string;
-            response = await apiRequest('GET', `/whatsapp/messages/${messageId}`);
+            response = await apiRequest('GET', `/whatsapp/messages/${pathSegment(messageId)}`);
           } else if (operation === 'edit') {
             const messageId = this.getNodeParameter('messageId', i) as string;
             const editedText = this.getNodeParameter('editedText', i) as string;
-            response = await apiRequest('PATCH', `/whatsapp/messages/${messageId}/edit`, { text: editedText });
+            response = await apiRequest('PATCH', `/whatsapp/messages/${pathSegment(messageId)}/edit`, { text: editedText });
           } else if (operation === 'cancel') {
             const messageId = this.getNodeParameter('messageId', i) as string;
-            response = await apiRequest('POST', `/whatsapp/messages/${messageId}/cancel`);
+            response = await apiRequest('POST', `/whatsapp/messages/${pathSegment(messageId)}/cancel`);
           } else if (operation === 'delete') {
             const messageId = this.getNodeParameter('messageId', i) as string;
-            response = await apiRequest('DELETE', `/whatsapp/messages/${messageId}`);
+            response = await apiRequest('DELETE', `/whatsapp/messages/${pathSegment(messageId)}`);
           }
         } else if (resource === 'whatsappInstances') {
           if (operation === 'list') {
@@ -501,33 +522,33 @@ export class NotifiqueNode implements INodeType {
           }
           if (operation === 'get') {
             const instanceId = this.getNodeParameter('instanceId', i) as string;
-            response = await apiRequest('GET', `/whatsapp/instances/${instanceId}`);
+            response = await apiRequest('GET', `/whatsapp/instances/${pathSegment(instanceId)}`);
           }
           if (operation === 'getQr') {
             const instanceId = this.getNodeParameter('instanceId', i) as string;
-            response = await apiRequest('GET', `/whatsapp/instances/${instanceId}/qr`);
+            response = await apiRequest('GET', `/whatsapp/instances/${pathSegment(instanceId)}/qr`);
           }
           if (operation === 'disconnect') {
             const instanceId = this.getNodeParameter('instanceId', i) as string;
-            response = await apiRequest('POST', `/whatsapp/instances/${instanceId}/disconnect`);
+            response = await apiRequest('POST', `/whatsapp/instances/${pathSegment(instanceId)}/disconnect`);
           }
           if (operation === 'delete') {
             const instanceId = this.getNodeParameter('instanceId', i) as string;
-            response = await apiRequest('DELETE', `/whatsapp/instances/${instanceId}`);
+            response = await apiRequest('DELETE', `/whatsapp/instances/${pathSegment(instanceId)}`);
           }
         } else if (resource === 'whatsappGroups') {
           const instanceId = this.getNodeParameter('instanceId', i) as string;
           if (operation === 'list') {
-            response = await apiRequest('GET', `/whatsapp/instances/${instanceId}/groups`);
+            response = await apiRequest('GET', `/whatsapp/instances/${pathSegment(instanceId)}/groups`);
           }
           if (operation === 'listParticipants') {
             const groupId = this.getNodeParameter('groupId', i) as string;
-            response = await apiRequest('GET', `/whatsapp/instances/${instanceId}/groups/${groupId}/participants`);
+            response = await apiRequest('GET', `/whatsapp/instances/${pathSegment(instanceId)}/groups/${pathSegment(groupId)}/participants`);
           }
           if (operation === 'addParticipants' || operation === 'removeParticipants') {
             const groupJid = this.getNodeParameter('groupJid', i) as string;
             const participants = toStringArray(this.getNodeParameter('participantsCsv', i) as string);
-            response = await apiRequest('POST', `/whatsapp/instances/${instanceId}/groups/participants`, {
+            response = await apiRequest('POST', `/whatsapp/instances/${pathSegment(instanceId)}/groups/participants`, {
               groupJid,
               action: operation === 'addParticipants' ? 'add' : 'remove',
               participants,
@@ -537,7 +558,7 @@ export class NotifiqueNode implements INodeType {
             const groupJids = toStringArray(this.getNodeParameter('groupJidsCsv', i) as string);
             const to = toStringArray(this.getNodeParameter('to', i) as string);
             const description = this.getNodeParameter('inviteDescription', i, 'Convite para o grupo') as string;
-            response = await apiRequest('POST', `/whatsapp/instances/${instanceId}/groups/invite`, {
+            response = await apiRequest('POST', `/whatsapp/instances/${pathSegment(instanceId)}/groups/invite`, {
               groups: groupJids,
               to,
               description,
@@ -545,11 +566,11 @@ export class NotifiqueNode implements INodeType {
           }
           if (operation === 'revokeInvite') {
             const groupJid = this.getNodeParameter('groupJid', i) as string;
-            response = await apiRequest('POST', `/whatsapp/instances/${instanceId}/groups/invite/revoke`, { groupJid });
+            response = await apiRequest('POST', `/whatsapp/instances/${pathSegment(instanceId)}/groups/invite/revoke`, { groupJid });
           }
           if (operation === 'getInviteCode') {
             const groupJid = this.getNodeParameter('groupJid', i) as string;
-            response = await apiRequest('GET', `/whatsapp/instances/${instanceId}/groups/invite-code`, undefined, { groupJid });
+            response = await apiRequest('GET', `/whatsapp/instances/${pathSegment(instanceId)}/groups/invite-code`, undefined, { groupJid });
           }
         } else if (resource === 'sms') {
           if (operation === 'send') {
@@ -558,10 +579,10 @@ export class NotifiqueNode implements INodeType {
             response = await apiRequest('POST', '/sms/messages', { to, message }, undefined, idempotencyHeaders);
           } else if (operation === 'get') {
             const smsId = this.getNodeParameter('smsId', i) as string;
-            response = await apiRequest('GET', `/sms/messages/${smsId}`);
+            response = await apiRequest('GET', `/sms/messages/${pathSegment(smsId)}`);
           } else if (operation === 'cancel') {
             const smsId = this.getNodeParameter('smsId', i) as string;
-            response = await apiRequest('POST', `/sms/messages/${smsId}/cancel`);
+            response = await apiRequest('POST', `/sms/messages/${pathSegment(smsId)}/cancel`);
           }
         } else if (resource === 'email') {
           if (operation === 'send') {
@@ -578,10 +599,10 @@ export class NotifiqueNode implements INodeType {
             response = await apiRequest('POST', '/email/messages', payload, undefined, idempotencyHeaders);
           } else if (operation === 'get') {
             const emailId = this.getNodeParameter('emailId', i) as string;
-            response = await apiRequest('GET', `/email/messages/${emailId}`);
+            response = await apiRequest('GET', `/email/messages/${pathSegment(emailId)}`);
           } else if (operation === 'cancel') {
             const emailId = this.getNodeParameter('emailId', i) as string;
-            response = await apiRequest('POST', `/email/messages/${emailId}/cancel`);
+            response = await apiRequest('POST', `/email/messages/${pathSegment(emailId)}/cancel`);
           }
         } else if (resource === 'templates') {
           const to = toStringArray(this.getNodeParameter('to', i) as string);
@@ -608,16 +629,16 @@ export class NotifiqueNode implements INodeType {
           }
           if (operation === 'get') {
             const contactId = this.getNodeParameter('contactId', i) as string;
-            response = await apiRequest('GET', `/contacts/${contactId}`);
+            response = await apiRequest('GET', `/contacts/${pathSegment(contactId)}`);
           }
           if (operation === 'update') {
             const contactId = this.getNodeParameter('contactId', i) as string;
             const payload = parseJsonObject(this.getNodeParameter('contactPayloadJson', i) as string);
-            response = await apiRequest('PUT', `/contacts/${contactId}`, payload);
+            response = await apiRequest('PUT', `/contacts/${pathSegment(contactId)}`, payload);
           }
           if (operation === 'delete') {
             const contactId = this.getNodeParameter('contactId', i) as string;
-            response = await apiRequest('DELETE', `/contacts/${contactId}`);
+            response = await apiRequest('DELETE', `/contacts/${pathSegment(contactId)}`);
           }
         } else if (resource === 'tags') {
           if (operation === 'list') {
@@ -629,16 +650,16 @@ export class NotifiqueNode implements INodeType {
           }
           if (operation === 'get') {
             const tagId = this.getNodeParameter('tagId', i) as string;
-            response = await apiRequest('GET', `/tags/${tagId}`);
+            response = await apiRequest('GET', `/tags/${pathSegment(tagId)}`);
           }
           if (operation === 'update') {
             const tagId = this.getNodeParameter('tagId', i) as string;
             const tagName = this.getNodeParameter('tagName', i) as string;
-            response = await apiRequest('PUT', `/tags/${tagId}`, { name: tagName });
+            response = await apiRequest('PUT', `/tags/${pathSegment(tagId)}`, { name: tagName });
           }
           if (operation === 'delete') {
             const tagId = this.getNodeParameter('tagId', i) as string;
-            response = await apiRequest('DELETE', `/tags/${tagId}`);
+            response = await apiRequest('DELETE', `/tags/${pathSegment(tagId)}`);
           }
         } else if (resource === 'emailDomains') {
           if (operation === 'list') response = await apiRequest('GET', '/email/domains');
@@ -648,11 +669,11 @@ export class NotifiqueNode implements INodeType {
           }
           if (operation === 'get') {
             const domainId = this.getNodeParameter('domainId', i) as string;
-            response = await apiRequest('GET', `/email/domains/${domainId}`);
+            response = await apiRequest('GET', `/email/domains/${pathSegment(domainId)}`);
           }
           if (operation === 'verify') {
             const domainId = this.getNodeParameter('domainId', i) as string;
-            response = await apiRequest('POST', `/email/domains/${domainId}/verify`);
+            response = await apiRequest('POST', `/email/domains/${pathSegment(domainId)}/verify`);
           }
         } else if (resource === 'pushApps') {
           if (operation === 'list') {
@@ -665,18 +686,18 @@ export class NotifiqueNode implements INodeType {
           }
           if (operation === 'get') {
             const appId = this.getNodeParameter('appId', i) as string;
-            response = await apiRequest('GET', `/push/apps/${appId}`);
+            response = await apiRequest('GET', `/push/apps/${pathSegment(appId)}`);
           }
           if (operation === 'update') {
             const appId = this.getNodeParameter('appId', i) as string;
             const appName = this.getNodeParameter('appName', i, '') as string;
             const patch = parseJsonObject(this.getNodeParameter('appUpdateJson', i, '{}') as string);
             if (appName) patch.name = appName;
-            response = await apiRequest('PUT', `/push/apps/${appId}`, patch);
+            response = await apiRequest('PUT', `/push/apps/${pathSegment(appId)}`, patch);
           }
           if (operation === 'delete') {
             const appId = this.getNodeParameter('appId', i) as string;
-            response = await apiRequest('DELETE', `/push/apps/${appId}`);
+            response = await apiRequest('DELETE', `/push/apps/${pathSegment(appId)}`);
           }
         } else if (resource === 'pushDevices') {
           if (operation === 'register') {
@@ -689,11 +710,11 @@ export class NotifiqueNode implements INodeType {
           }
           if (operation === 'get') {
             const deviceId = this.getNodeParameter('deviceId', i) as string;
-            response = await apiRequest('GET', `/push/devices/${deviceId}`);
+            response = await apiRequest('GET', `/push/devices/${pathSegment(deviceId)}`);
           }
           if (operation === 'delete') {
             const deviceId = this.getNodeParameter('deviceId', i) as string;
-            response = await apiRequest('DELETE', `/push/devices/${deviceId}`);
+            response = await apiRequest('DELETE', `/push/devices/${pathSegment(deviceId)}`);
           }
         } else if (resource === 'pushMessages') {
           if (operation === 'send') {
@@ -706,11 +727,11 @@ export class NotifiqueNode implements INodeType {
           }
           if (operation === 'get') {
             const pushMessageId = this.getNodeParameter('pushMessageId', i) as string;
-            response = await apiRequest('GET', `/push/messages/${pushMessageId}`);
+            response = await apiRequest('GET', `/push/messages/${pathSegment(pushMessageId)}`);
           }
           if (operation === 'cancel') {
             const pushMessageId = this.getNodeParameter('pushMessageId', i) as string;
-            response = await apiRequest('POST', `/push/messages/${pushMessageId}/cancel`);
+            response = await apiRequest('POST', `/push/messages/${pathSegment(pushMessageId)}/cancel`);
           }
         }
 

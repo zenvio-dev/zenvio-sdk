@@ -12,7 +12,7 @@ class NotifiqueApiException extends Exception
         ?Exception $previous = null
     ) {
         parent::__construct(
-            $responseBody,
+            "Notifique API error {$statusCode}",
             0,
             $previous
         );

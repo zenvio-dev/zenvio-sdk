@@ -15,11 +15,11 @@ public sealed class SmsApi
 
     public Task<SmsStatusResponse> GetAsync(string messageId, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<SmsStatusResponse>(HttpMethod.Get, $"/sms/messages/{messageId}", cancellationToken: cancellationToken);
+        return _client.RequestAsync<SmsStatusResponse>(HttpMethod.Get, $"/sms/messages/{NotifiqueClient.EscapePathSegment(messageId)}", cancellationToken: cancellationToken);
     }
 
     public Task<SmsCancelResponse> CancelAsync(string messageId, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<SmsCancelResponse>(HttpMethod.Post, $"/sms/messages/{messageId}/cancel", cancellationToken: cancellationToken);
+        return _client.RequestAsync<SmsCancelResponse>(HttpMethod.Post, $"/sms/messages/{NotifiqueClient.EscapePathSegment(messageId)}/cancel", cancellationToken: cancellationToken);
     }
 }

@@ -31,11 +31,11 @@ public sealed class EmailDomainsApi
 
     public Task<EmailDomainGetResponse> GetAsync(string id, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<EmailDomainGetResponse>(HttpMethod.Get, $"/email/domains/{id}", cancellationToken: cancellationToken);
+        return _client.RequestAsync<EmailDomainGetResponse>(HttpMethod.Get, $"/email/domains/{NotifiqueClient.EscapePathSegment(id)}", cancellationToken: cancellationToken);
     }
 
     public Task<EmailDomainVerifyResponse> VerifyAsync(string id, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<EmailDomainVerifyResponse>(HttpMethod.Post, $"/email/domains/{id}/verify", cancellationToken: cancellationToken);
+        return _client.RequestAsync<EmailDomainVerifyResponse>(HttpMethod.Post, $"/email/domains/{NotifiqueClient.EscapePathSegment(id)}/verify", cancellationToken: cancellationToken);
     }
 }

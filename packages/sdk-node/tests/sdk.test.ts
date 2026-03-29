@@ -1,6 +1,5 @@
 import axios from 'axios';
-// Use dist so we test the built artifact (same as published package)
-import { Notifique } from '../dist';
+import { Notifique } from '../src';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -42,6 +41,15 @@ describe('Node.js SDK — WhatsApp (API-aligned)', () => {
       createMockClient({ post: mockPost, get: mockGet, delete: mockDelete, patch: mockPatch })
     );
     notifique = new Notifique({ apiKey: 'test-api-key' });
+  });
+
+  it('configures a default 30s timeout', () => {
+    expect(mockedAxios.create).toHaveBeenCalledWith(expect.objectContaining({ timeout: 30000 }));
+  });
+
+  it('rejects non-HTTPS baseUrl', () => {
+    expect(() => new Notifique({ apiKey: 'test-api-key', baseUrl: 'http://localhost:3000/v1' }))
+      .toThrow('baseUrl must use HTTPS');
   });
 
   it('sends via POST /whatsapp/messages with instanceId in body', async () => {

@@ -9,12 +9,11 @@ import { Notifique, NotifiqueApiError } from '@notifique/sdk-node';
  */
 
 async function main() {
-  const apiKey = process.env.NOTIFIQUE_API_KEY || 'your_api_key_here';
-  const instanceId = process.env.NOTIFIQUE_INSTANCE_ID || 'your_instance_id_here';
-  const myPhoneNumber = process.env.MY_PHONE || '5511999999999';
-
-  if (apiKey === 'your_api_key_here' || instanceId === 'your_instance_id_here') {
-    console.log('Dica: defina NOTIFIQUE_API_KEY e NOTIFIQUE_INSTANCE_ID para chamar a API de verdade.');
+  const apiKey = process.env.NOTIFIQUE_API_KEY;
+  const instanceId = process.env.NOTIFIQUE_INSTANCE_ID;
+  const myPhoneNumber = process.env.MY_PHONE;
+  if (!apiKey || !instanceId || !myPhoneNumber) {
+    throw new Error('Set NOTIFIQUE_API_KEY, NOTIFIQUE_INSTANCE_ID and MY_PHONE before running this example.');
   }
 
   const notifique = new Notifique({ apiKey });

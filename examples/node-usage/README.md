@@ -22,11 +22,11 @@ This project demonstrates how to use the official Notifique Node.js SDK to send 
    npm install
    ```
 
-3. **Configure the Example**:
-   Open `src/index.ts` and replace the placeholder values:
-   - `apiKey`: Your Notifique API Key.
-   - `phoneId`: The ID of the instance you want to send from.
-   - `to`: The recipient phone number(s).
+3. **Configure Environment Variables**:
+   Export the required values:
+   - `NOTIFIQUE_API_KEY`
+   - `NOTIFIQUE_INSTANCE_ID`
+   - `MY_PHONE`
 
 ## Running the example
 

@@ -8,10 +8,10 @@ defmodule Notifique.Email do
   end
 
   def get(client, id, opts \\ []) do
-    Notifique.request(client, :get, "/email/messages/#{id}", nil, opts)
+    Notifique.request(client, :get, "/email/messages/#{Notifique.encode_path_segment(id)}", nil, opts)
   end
 
   def cancel(client, id, opts \\ []) do
-    Notifique.request(client, :post, "/email/messages/#{id}/cancel", nil, opts)
+    Notifique.request(client, :post, "/email/messages/#{Notifique.encode_path_segment(id)}/cancel", nil, opts)
   end
 end

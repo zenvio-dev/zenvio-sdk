@@ -46,12 +46,12 @@ class Email
     /** GET /v1/email/messages/:id */
     public function get(string $id): array
     {
-        return $this->client->request('GET', '/email/messages/' . $id, null);
+        return $this->client->request('GET', '/email/messages/' . Notifique::encodePathSegment($id), null);
     }
 
     /** POST /v1/email/messages/:id/cancel */
     public function cancel(string $id): array
     {
-        return $this->client->request('POST', '/email/messages/' . $id . '/cancel', null);
+        return $this->client->request('POST', '/email/messages/' . Notifique::encodePathSegment($id) . '/cancel', null);
     }
 }

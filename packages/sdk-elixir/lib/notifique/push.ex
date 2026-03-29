@@ -10,7 +10,7 @@ defmodule Notifique.Push do
   end
 
   def get_app(client, id, opts \\ []) do
-    Notifique.request(client, :get, "/push/apps/#{id}", nil, opts)
+    Notifique.request(client, :get, "/push/apps/#{Notifique.encode_path_segment(id)}", nil, opts)
   end
 
   def create_app(client, params, opts \\ []) do
@@ -18,11 +18,11 @@ defmodule Notifique.Push do
   end
 
   def update_app(client, id, params, opts \\ []) do
-    Notifique.request(client, :put, "/push/apps/#{id}", params, opts)
+    Notifique.request(client, :put, "/push/apps/#{Notifique.encode_path_segment(id)}", params, opts)
   end
 
   def delete_app(client, id, opts \\ []) do
-    Notifique.request(client, :delete, "/push/apps/#{id}", nil, opts)
+    Notifique.request(client, :delete, "/push/apps/#{Notifique.encode_path_segment(id)}", nil, opts)
   end
 
   def register_device(client, params, opts \\ []) do
@@ -36,11 +36,11 @@ defmodule Notifique.Push do
   end
 
   def get_device(client, id, opts \\ []) do
-    Notifique.request(client, :get, "/push/devices/#{id}", nil, opts)
+    Notifique.request(client, :get, "/push/devices/#{Notifique.encode_path_segment(id)}", nil, opts)
   end
 
   def delete_device(client, id, opts \\ []) do
-    Notifique.request(client, :delete, "/push/devices/#{id}", nil, opts)
+    Notifique.request(client, :delete, "/push/devices/#{Notifique.encode_path_segment(id)}", nil, opts)
   end
 
   def send_message(client, params, opts \\ []) do
@@ -54,10 +54,10 @@ defmodule Notifique.Push do
   end
 
   def get_message(client, id, opts \\ []) do
-    Notifique.request(client, :get, "/push/messages/#{id}", nil, opts)
+    Notifique.request(client, :get, "/push/messages/#{Notifique.encode_path_segment(id)}", nil, opts)
   end
 
   def cancel_message(client, id, opts \\ []) do
-    Notifique.request(client, :post, "/push/messages/#{id}/cancel", nil, opts)
+    Notifique.request(client, :post, "/push/messages/#{Notifique.encode_path_segment(id)}/cancel", nil, opts)
   end
 end

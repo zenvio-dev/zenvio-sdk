@@ -5,6 +5,11 @@ using System.Text.Json.Serialization;
 
 namespace Notifique;
 
+/// <summary>
+/// Main client for the Notifique API. Create once and reuse as a singleton.
+/// Implements <see cref="IDisposable"/>: call <c>Dispose()</c> when the client is no longer needed
+/// (or use a <c>using</c> statement) to release the underlying <see cref="HttpClient"/>.
+/// </summary>
 public class NotifiqueClient : IDisposable
 {
     protected const string DefaultBaseUrl = "https://api.notifique.dev/v1";
@@ -38,8 +43,12 @@ public class NotifiqueClient : IDisposable
 
     public NotifiqueClient(string apiKey, string baseUrl, HttpClient? httpClient)
     {
-        _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
-        _baseUrl = (baseUrl ?? DefaultBaseUrl).TrimEnd('/');
+        if (string.IsNullOrWhiteSpace(apiKey))
+            throw new ArgumentException("apiKey must be a non-empty string.", nameof(apiKey));
+        if (!Uri.TryCreate(baseUrl ?? DefaultBaseUrl, UriKind.Absolute, out var parsedBaseUrl) || parsedBaseUrl.Scheme != Uri.UriSchemeHttps)
+            throw new ArgumentException("baseUrl must be an absolute HTTPS URL.", nameof(baseUrl));
+        _apiKey = apiKey;
+        _baseUrl = parsedBaseUrl.ToString().TrimEnd('/');
 
         if (httpClient is not null)
         {
@@ -59,6 +68,8 @@ public class NotifiqueClient : IDisposable
         EmailDomains = new EmailDomainsApi(this);
         Push = new PushApi(this);
     }
+
+    internal static string EscapePathSegment(string value) => Uri.EscapeDataString(value);
 
     internal async Task<T> RequestAsync<T>(HttpMethod method, string path, object? body = null, CancellationToken cancellationToken = default)
     {
@@ -95,9 +106,28 @@ public class NotifiqueClient : IDisposable
         return responseBody;
     }
 
-    public virtual void Dispose()
+    /// <summary>
+    /// Releases resources used by this client.
+    /// Call this method (or use a <c>using</c> statement) when the client is no longer needed.
+    /// </summary>
+    public void Dispose()
     {
-        if (_ownsHttpClient)
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Finalizer — ensures the <see cref="HttpClient"/> is released even if
+    /// the consumer forgets to call <see cref="Dispose()"/>.
+    /// </summary>
+    ~NotifiqueClient() => Dispose(disposing: false);
+
+    /// <param name="disposing">
+    /// <c>true</c> when called from <see cref="Dispose()"/>; <c>false</c> from the finalizer.
+    /// </param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing && _ownsHttpClient)
         {
             _httpClient.Dispose();
         }

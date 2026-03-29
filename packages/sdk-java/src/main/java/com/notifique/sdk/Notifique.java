@@ -3,9 +3,11 @@ package com.notifique.sdk;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 /**
@@ -35,8 +37,16 @@ public class Notifique {
     }
 
     public Notifique(String apiKey, String baseUrl, HttpClient httpClient) {
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            throw new IllegalArgumentException("apiKey must be a non-empty string");
+        }
+        String effectiveBaseUrl = (baseUrl == null || baseUrl.isBlank()) ? "https://api.notifique.dev/v1" : baseUrl;
+        URI parsedBase = URI.create(effectiveBaseUrl);
+        if (!"https".equalsIgnoreCase(parsedBase.getScheme()) || parsedBase.getHost() == null || parsedBase.getHost().isBlank()) {
+            throw new IllegalArgumentException("baseUrl must be an absolute HTTPS URL");
+        }
         this.apiKey = apiKey;
-        this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+        this.baseUrl = effectiveBaseUrl.endsWith("/") ? effectiveBaseUrl.substring(0, effectiveBaseUrl.length() - 1) : effectiveBaseUrl;
         this.httpClient = httpClient;
         this.objectMapper = new ObjectMapper();
         this.whatsapp = new WhatsAppNamespace(this);
@@ -58,7 +68,8 @@ public class Notifique {
                     .uri(URI.create(baseUrl + path))
                     .header("Authorization", "Bearer " + apiKey)
                     .header("Content-Type", "application/json")
-                    .header("User-Agent", "Notifique-Java-SDK/0.2.0");
+                    .header("User-Agent", "Notifique-Java-SDK/0.2.0")
+                    .timeout(Duration.ofSeconds(30));
 
             if ("GET".equals(method) || "DELETE".equals(method)) {
                 builder.method(method, HttpRequest.BodyPublishers.noBody());
@@ -82,5 +93,9 @@ public class Notifique {
         } catch (Exception e) {
             throw new RuntimeException("SDK request failed: " + e.getMessage(), e);
         }
+    }
+
+    static String encodePathSegment(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8).replace("+", "%20");
     }
 }

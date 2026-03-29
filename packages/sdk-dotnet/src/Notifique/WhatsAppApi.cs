@@ -48,27 +48,27 @@ public sealed class WhatsAppApi
 
     public Task<WhatsAppMessageEnvelope> GetMessageAsync(string messageId, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<WhatsAppMessageEnvelope>(HttpMethod.Get, $"/whatsapp/messages/{messageId}", cancellationToken: cancellationToken);
+        return _client.RequestAsync<WhatsAppMessageEnvelope>(HttpMethod.Get, $"/whatsapp/messages/{NotifiqueClient.EscapePathSegment(messageId)}", cancellationToken: cancellationToken);
     }
 
     public Task<WhatsAppInstanceQrResponse> GetInstanceQrAsync(string instanceId, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<WhatsAppInstanceQrResponse>(HttpMethod.Get, $"/whatsapp/instances/{instanceId}/qr", cancellationToken: cancellationToken);
+        return _client.RequestAsync<WhatsAppInstanceQrResponse>(HttpMethod.Get, $"/whatsapp/instances/{NotifiqueClient.EscapePathSegment(instanceId)}/qr", cancellationToken: cancellationToken);
     }
 
     public Task<WhatsAppMessageActionResponse> DeleteMessageAsync(string messageId, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<WhatsAppMessageActionResponse>(HttpMethod.Delete, $"/whatsapp/messages/{messageId}", cancellationToken: cancellationToken);
+        return _client.RequestAsync<WhatsAppMessageActionResponse>(HttpMethod.Delete, $"/whatsapp/messages/{NotifiqueClient.EscapePathSegment(messageId)}", cancellationToken: cancellationToken);
     }
 
     public Task<WhatsAppMessageActionResponse> EditMessageAsync(string messageId, string text, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<WhatsAppMessageActionResponse>(HttpMethod.Patch, $"/whatsapp/messages/{messageId}/edit", new { text }, cancellationToken);
+        return _client.RequestAsync<WhatsAppMessageActionResponse>(HttpMethod.Patch, $"/whatsapp/messages/{NotifiqueClient.EscapePathSegment(messageId)}/edit", new { text }, cancellationToken);
     }
 
     public Task<WhatsAppMessageActionResponse> CancelMessageAsync(string messageId, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<WhatsAppMessageActionResponse>(HttpMethod.Post, $"/whatsapp/messages/{messageId}/cancel", cancellationToken: cancellationToken);
+        return _client.RequestAsync<WhatsAppMessageActionResponse>(HttpMethod.Post, $"/whatsapp/messages/{NotifiqueClient.EscapePathSegment(messageId)}/cancel", cancellationToken: cancellationToken);
     }
 
     public Task<WhatsAppInstanceListResponse> ListInstancesAsync(CancellationToken cancellationToken = default)
@@ -89,7 +89,7 @@ public sealed class WhatsAppApi
 
     public Task<WhatsAppInstanceResponse> GetInstanceAsync(string instanceId, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<WhatsAppInstanceResponse>(HttpMethod.Get, $"/whatsapp/instances/{instanceId}", cancellationToken: cancellationToken);
+        return _client.RequestAsync<WhatsAppInstanceResponse>(HttpMethod.Get, $"/whatsapp/instances/{NotifiqueClient.EscapePathSegment(instanceId)}", cancellationToken: cancellationToken);
     }
 
     public Task<WhatsAppCreateInstanceResponse> CreateInstanceAsync(string name, CancellationToken cancellationToken = default)
@@ -99,11 +99,11 @@ public sealed class WhatsAppApi
 
     public Task<WhatsAppInstanceActionResponse> DisconnectInstanceAsync(string instanceId, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<WhatsAppInstanceActionResponse>(HttpMethod.Post, $"/whatsapp/instances/{instanceId}/disconnect", cancellationToken: cancellationToken);
+        return _client.RequestAsync<WhatsAppInstanceActionResponse>(HttpMethod.Post, $"/whatsapp/instances/{NotifiqueClient.EscapePathSegment(instanceId)}/disconnect", cancellationToken: cancellationToken);
     }
 
     public Task<WhatsAppInstanceActionResponse> DeleteInstanceAsync(string instanceId, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<WhatsAppInstanceActionResponse>(HttpMethod.Delete, $"/whatsapp/instances/{instanceId}", cancellationToken: cancellationToken);
+        return _client.RequestAsync<WhatsAppInstanceActionResponse>(HttpMethod.Delete, $"/whatsapp/instances/{NotifiqueClient.EscapePathSegment(instanceId)}", cancellationToken: cancellationToken);
     }
 }

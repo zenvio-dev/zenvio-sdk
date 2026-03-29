@@ -51,6 +51,22 @@ import type {
 export { NotifiqueApiError } from '@notifique/core';
 export * from '@notifique/core';
 
+function assertSecureBaseUrl(baseUrl: string): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(baseUrl);
+  } catch {
+    throw new Error('Notifique: baseUrl must be a valid absolute URL');
+  }
+  if (parsed.protocol !== 'https:') {
+    throw new Error('Notifique: baseUrl must use HTTPS');
+  }
+}
+
+function pathSegment(value: string): string {
+  return encodeURIComponent(value);
+}
+
 /** Converte chaves snake_case em camelCase (recursivo). A API retorna snake_case; o SDK expõe camelCase. */
 function toCamelCase<T>(value: unknown): T {
   if (value === null || value === undefined) return value as T;
@@ -80,11 +96,14 @@ function normalizeSendBody(
   };
 }
 
-function idempotencyHeaders(opts?: SendOptions): Record<string, string> | undefined {
+/** Returns axios request config with idempotency headers, or undefined if no key provided. */
+function idempotencyConfig(opts?: SendOptions): { headers: Record<string, string> } | undefined {
   if (!opts?.idempotencyKey) return undefined;
   return {
-    'Idempotency-Key': opts.idempotencyKey,
-    'x-idempotency-key': opts.idempotencyKey,
+    headers: {
+      'Idempotency-Key': opts.idempotencyKey,
+      'x-idempotency-key': opts.idempotencyKey,
+    },
   };
 }
 
@@ -93,13 +112,19 @@ export class Notifique {
   private config: NotifiqueConfig;
 
   constructor(config: NotifiqueConfig) {
+    if (!config?.apiKey || typeof config.apiKey !== 'string' || config.apiKey.trim() === '') {
+      throw new Error('Notifique: apiKey must be a non-empty string');
+    }
+    const candidateBaseUrl = config.baseUrl ?? 'https://api.notifique.dev/v1';
+    assertSecureBaseUrl(candidateBaseUrl);
     this.config = {
-      baseUrl: 'https://api.notifique.dev/v1',
+      baseUrl: candidateBaseUrl,
       ...config,
     };
 
     this.client = axios.create({
       baseURL: this.config.baseUrl,
+      timeout: 30_000,
       headers: {
         Authorization: `Bearer ${this.config.apiKey}`,
         'Content-Type': 'application/json',
@@ -149,7 +174,7 @@ export class Notifique {
       const response = await this.client.post<{ success: boolean; data: WhatsAppSendResponse }>(
         '/whatsapp/messages',
         normalizeSendBody(instanceId, params as Omit<WhatsAppSendParams, 'instanceId'>),
-        idempotencyHeaders(opts) ? { headers: idempotencyHeaders(opts) } : undefined
+        idempotencyConfig(opts)
       );
       return response.data;
     },
@@ -184,7 +209,7 @@ export class Notifique {
       messageId: string
     ): Promise<{ success: boolean; data: WhatsAppMessageStatus }> => {
       const response = await this.client.get<{ success: boolean; data: WhatsAppMessageStatus }>(
-        `/whatsapp/messages/${messageId}`
+        `/whatsapp/messages/${pathSegment(messageId)}`
       );
       return response.data;
     },
@@ -194,7 +219,7 @@ export class Notifique {
       messageId: string
     ): Promise<WhatsAppMessageActionResponse> => {
       const response = await this.client.delete<WhatsAppMessageActionResponse>(
-        `/whatsapp/messages/${messageId}`
+        `/whatsapp/messages/${pathSegment(messageId)}`
       );
       return response.data;
     },
@@ -205,7 +230,7 @@ export class Notifique {
       body: { text: string }
     ): Promise<WhatsAppMessageActionResponse> => {
       const response = await this.client.patch<WhatsAppMessageActionResponse>(
-        `/whatsapp/messages/${messageId}/edit`,
+        `/whatsapp/messages/${pathSegment(messageId)}/edit`,
         body
       );
       return response.data;
@@ -216,7 +241,7 @@ export class Notifique {
       messageId: string
     ): Promise<WhatsAppMessageActionResponse> => {
       const response = await this.client.post<WhatsAppMessageActionResponse>(
-        `/whatsapp/messages/${messageId}/cancel`
+        `/whatsapp/messages/${pathSegment(messageId)}/cancel`
       );
       return response.data;
     },
@@ -239,7 +264,7 @@ export class Notifique {
       const response = await this.client.get<{
         success: boolean;
         data: WhatsAppInstance;
-      }>(`/whatsapp/instances/${instanceId}`);
+      }>(`/whatsapp/instances/${pathSegment(instanceId)}`);
       return response.data;
     },
 
@@ -248,7 +273,7 @@ export class Notifique {
       instanceId: string
     ): Promise<WhatsAppInstanceQrResponse> => {
       const response = await this.client.get<WhatsAppInstanceQrResponse>(
-        `/whatsapp/instances/${instanceId}/qr`
+        `/whatsapp/instances/${pathSegment(instanceId)}/qr`
       );
       return response.data;
     },
@@ -269,7 +294,7 @@ export class Notifique {
       instanceId: string
     ): Promise<WhatsAppInstanceActionResponse> => {
       const response = await this.client.post<WhatsAppInstanceActionResponse>(
-        `/whatsapp/instances/${instanceId}/disconnect`
+        `/whatsapp/instances/${pathSegment(instanceId)}/disconnect`
       );
       return response.data;
     },
@@ -279,7 +304,7 @@ export class Notifique {
       instanceId: string
     ): Promise<WhatsAppInstanceActionResponse> => {
       const response = await this.client.delete<WhatsAppInstanceActionResponse>(
-        `/whatsapp/instances/${instanceId}`
+        `/whatsapp/instances/${pathSegment(instanceId)}`
       );
       return response.data;
     },
@@ -307,16 +332,16 @@ export class Notifique {
       const response = await this.client.post<SmsSendResponse>(
         '/sms/messages',
         params,
-        idempotencyHeaders(opts) ? { headers: idempotencyHeaders(opts) } : undefined
+        idempotencyConfig(opts)
       );
       return response.data;
     },
     get: async (id: string): Promise<SmsStatusResponse> => {
-      const response = await this.client.get<SmsStatusResponse>(`/sms/messages/${id}`);
+      const response = await this.client.get<SmsStatusResponse>(`/sms/messages/${pathSegment(id)}`);
       return response.data;
     },
     cancel: async (id: string): Promise<SmsCancelResponse> => {
-      const response = await this.client.post<SmsCancelResponse>(`/sms/messages/${id}/cancel`);
+      const response = await this.client.post<SmsCancelResponse>(`/sms/messages/${pathSegment(id)}/cancel`);
       return response.data;
     },
   };
@@ -330,16 +355,16 @@ export class Notifique {
       const response = await this.client.post<EmailSendResponse>(
         '/email/messages',
         params,
-        idempotencyHeaders(opts) ? { headers: idempotencyHeaders(opts) } : undefined
+        idempotencyConfig(opts)
       );
       return response.data;
     },
     get: async (id: string): Promise<EmailStatusResponse> => {
-      const response = await this.client.get<EmailStatusResponse>(`/email/messages/${id}`);
+      const response = await this.client.get<EmailStatusResponse>(`/email/messages/${pathSegment(id)}`);
       return response.data;
     },
     cancel: async (id: string): Promise<EmailCancelResponse> => {
-      const response = await this.client.post<EmailCancelResponse>(`/email/messages/${id}/cancel`);
+      const response = await this.client.post<EmailCancelResponse>(`/email/messages/${pathSegment(id)}/cancel`);
       return response.data;
     },
     /** GET /v1/email/domains — Lista domínios de e-mail. */
@@ -359,13 +384,13 @@ export class Notifique {
       },
       get: async (id: string): Promise<GetEmailDomainResponse> => {
         const response = await this.client.get<GetEmailDomainResponse>(
-          `/email/domains/${id}`
+          `/email/domains/${pathSegment(id)}`
         );
         return response.data;
       },
       verify: async (id: string): Promise<VerifyEmailDomainResponse> => {
         const response = await this.client.post<VerifyEmailDomainResponse>(
-          `/email/domains/${id}/verify`
+          `/email/domains/${pathSegment(id)}/verify`
         );
         return response.data;
       },
@@ -386,7 +411,7 @@ export class Notifique {
       },
       get: async (id: string): Promise<PushAppSingleResponse> => {
         const response = await this.client.get<PushAppSingleResponse>(
-          `/push/apps/${id}`
+          `/push/apps/${pathSegment(id)}`
         );
         return response.data;
       },
@@ -404,14 +429,14 @@ export class Notifique {
         params: PushAppUpdateRequest
       ): Promise<PushAppSingleResponse> => {
         const response = await this.client.put<PushAppSingleResponse>(
-          `/push/apps/${id}`,
+          `/push/apps/${pathSegment(id)}`,
           params
         );
         return response.data;
       },
       delete: async (id: string): Promise<{ success: boolean }> => {
         const response = await this.client.delete<{ success: boolean }>(
-          `/push/apps/${id}`
+          `/push/apps/${pathSegment(id)}`
         );
         return response.data;
       },
@@ -435,13 +460,13 @@ export class Notifique {
       },
       get: async (id: string): Promise<PushDeviceSingleResponse> => {
         const response = await this.client.get<PushDeviceSingleResponse>(
-          `/push/devices/${id}`
+          `/push/devices/${pathSegment(id)}`
         );
         return response.data;
       },
       delete: async (id: string): Promise<{ success: boolean }> => {
         const response = await this.client.delete<{ success: boolean }>(
-          `/push/devices/${id}`
+          `/push/devices/${pathSegment(id)}`
         );
         return response.data;
       },
@@ -452,7 +477,7 @@ export class Notifique {
         const response = await this.client.post<SendPushResponse>(
           '/push/messages',
           params,
-          idempotencyHeaders(opts) ? { headers: idempotencyHeaders(opts) } : undefined
+          idempotencyConfig(opts)
         );
         return response.data;
       },
@@ -465,19 +490,24 @@ export class Notifique {
       },
       get: async (id: string): Promise<PushMessageSingleResponse> => {
         const response = await this.client.get<PushMessageSingleResponse>(
-          `/push/messages/${id}`
+          `/push/messages/${pathSegment(id)}`
         );
         return response.data;
       },
       cancel: async (id: string): Promise<CancelPushResponse> => {
         const response = await this.client.post<CancelPushResponse>(
-          `/push/messages/${id}/cancel`
+          `/push/messages/${pathSegment(id)}/cancel`
         );
         return response.data;
       },
     },
   };
 
+  /**
+   * @internal — For testing only. Do NOT call in production: exposes raw AxiosInstance
+   * including the Authorization header (API key). Accidental logging = key leak.
+   * @deprecated Use the typed methods (whatsapp, sms, email, push, messages) instead.
+   */
   public getClient(): AxiosInstance {
     return this.client;
   }

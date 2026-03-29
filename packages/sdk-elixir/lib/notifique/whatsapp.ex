@@ -25,19 +25,19 @@ defmodule Notifique.Whatsapp do
   end
 
   def get_message(client, message_id, opts \\ []) do
-    Notifique.request(client, :get, "/whatsapp/messages/#{message_id}", nil, opts)
+    Notifique.request(client, :get, "/whatsapp/messages/#{Notifique.encode_path_segment(message_id)}", nil, opts)
   end
 
   def delete_message(client, message_id, opts \\ []) do
-    Notifique.request(client, :delete, "/whatsapp/messages/#{message_id}", nil, opts)
+    Notifique.request(client, :delete, "/whatsapp/messages/#{Notifique.encode_path_segment(message_id)}", nil, opts)
   end
 
   def edit_message(client, message_id, text, opts \\ []) do
-    Notifique.request(client, :patch, "/whatsapp/messages/#{message_id}/edit", %{"text" => text}, opts)
+    Notifique.request(client, :patch, "/whatsapp/messages/#{Notifique.encode_path_segment(message_id)}/edit", %{"text" => text}, opts)
   end
 
   def cancel_message(client, message_id, opts \\ []) do
-    Notifique.request(client, :post, "/whatsapp/messages/#{message_id}/cancel", nil, opts)
+    Notifique.request(client, :post, "/whatsapp/messages/#{Notifique.encode_path_segment(message_id)}/cancel", nil, opts)
   end
 
   def list_instances(client, params \\ %{}, opts \\ []) do
@@ -47,11 +47,11 @@ defmodule Notifique.Whatsapp do
   end
 
   def get_instance(client, instance_id, opts \\ []) do
-    Notifique.request(client, :get, "/whatsapp/instances/#{instance_id}", nil, opts)
+    Notifique.request(client, :get, "/whatsapp/instances/#{Notifique.encode_path_segment(instance_id)}", nil, opts)
   end
 
   def get_instance_qr(client, instance_id, opts \\ []) do
-    Notifique.request(client, :get, "/whatsapp/instances/#{instance_id}/qr", nil, opts)
+    Notifique.request(client, :get, "/whatsapp/instances/#{Notifique.encode_path_segment(instance_id)}/qr", nil, opts)
   end
 
   @doc """
@@ -63,10 +63,10 @@ defmodule Notifique.Whatsapp do
   end
 
   def disconnect_instance(client, instance_id, opts \\ []) do
-    Notifique.request(client, :post, "/whatsapp/instances/#{instance_id}/disconnect", nil, opts)
+    Notifique.request(client, :post, "/whatsapp/instances/#{Notifique.encode_path_segment(instance_id)}/disconnect", nil, opts)
   end
 
   def delete_instance(client, instance_id, opts \\ []) do
-    Notifique.request(client, :delete, "/whatsapp/instances/#{instance_id}", nil, opts)
+    Notifique.request(client, :delete, "/whatsapp/instances/#{Notifique.encode_path_segment(instance_id)}", nil, opts)
   end
 end

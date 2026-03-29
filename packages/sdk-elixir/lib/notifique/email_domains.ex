@@ -12,10 +12,10 @@ defmodule Notifique.EmailDomains do
   end
 
   def get(client, id, opts \\ []) do
-    Notifique.request(client, :get, "/email/domains/#{id}", nil, opts)
+    Notifique.request(client, :get, "/email/domains/#{Notifique.encode_path_segment(id)}", nil, opts)
   end
 
   def verify(client, id, opts \\ []) do
-    Notifique.request(client, :post, "/email/domains/#{id}/verify", nil, opts)
+    Notifique.request(client, :post, "/email/domains/#{Notifique.encode_path_segment(id)}/verify", nil, opts)
   end
 end

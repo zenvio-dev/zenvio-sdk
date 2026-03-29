@@ -1,134 +1,162 @@
 # 🚀 Notifique SDK
 
-Monorepo dos SDKs oficiais **Notifique** para comunicação multicanal: WhatsApp, SMS, Email e Push.
+Monorepo oficial de SDKs multilíngues para a API de mensageria multicanal da Notifique: WhatsApp, SMS, Email e Push.
 
-Todos os SDKs usam por padrão a base URL `https://api.notifique.dev/v1` e seguem a mesma arquitetura por namespaces.
+Todos os SDKs utilizam `https://api.notifique.dev/v1` e compartilham a mesma arquitetura de namespaces.
 
 ---
 
-## 📦 SDKs e pacotes
+## 📦 Pacotes
 
-| Linguagem | Pacote | Status |
+| Linguagem | Pacote | Documentação |
 | :--- | :--- | :--- |
-| **Node.js** | `@notifique/core`, `@notifique/sdk-node` | ✅ Estável |
-| **n8n** | `n8n-nodes-notifique` | ✅ Estável |
-| **Python** | `notifique-sdk` (classe `Notifique`) | ✅ Estável |
-| **Java** | `com.notifique.sdk` (classe `Notifique`) | ✅ Estável |
-| **Go** | `github.com/notifique/notifique-sdk-go` (pacote `notifique`) | ✅ Estável |
-| **PHP** | `notifique/notifique-sdk-php` (classe `Notifique\Notifique`) | ✅ Estável |
-| **Elixir** | `notifique` (módulo `Notifique`) | ✅ Estável |
-| **.NET** | `Notifique` (classe `NotifiqueClient`) | ✅ Estável |
+| **Node.js / TypeScript** | `@notifique/core`, `@notifique/sdk-node` | [README](./packages/sdk-node/README.md) |
+| **n8n** | `n8n-nodes-notifique` | [README](./packages/n8n-nodes-notifique/README.md) |
+| **Python** | `notifique-sdk` | [README](./packages/sdk-python/README.md) |
+| **Java** | `com.notifique.sdk` | [README](./packages/sdk-java/README.md) |
+| **Go** | `github.com/notifique/notifique-sdk-go` | [README](./packages/sdk-go/README.md) |
+| **PHP** | `notifique/notifique-sdk-php` | [README](./packages/sdk-php/README.md) |
+| **Elixir** | `notifique` | [README](./packages/sdk-elixir/README.md) |
+| **.NET** | `Notifique` | [README](./packages/sdk-dotnet/README.md) |
 
 ---
 
-## 🛠️ Quick Start (API unificada)
+## 🛠️ Início Rápido
 
-Use o cliente **Notifique** (ou equivalente) e a mesma lógica em todas as linguagens.
+### Node.js / TypeScript
 
-### Node.js
 ```typescript
-const notifique = new Notifique({ apiKey: '...' });
-const { data } = await notifique.whatsapp.sendText(instanceId, '55119...', 'Hello! 🚀');
+import { Notifique } from '@notifique/sdk-node';
+
+// Crie uma única vez ao iniciar a aplicação — NÃO instancie por requisição.
+const client = new Notifique({ apiKey: 'YOUR_API_KEY' });
+
+const { data } = await client.whatsapp.sendText(instanceId, '5511999999999', 'Olá! 🚀');
+console.log(data.messageIds);
 ```
 
 ### Python
+
 ```python
-notifique = Notifique(api_key='...')
-resp = notifique.whatsapp.send_text(instance_id, '55119...', 'Hello! 🐍')
+from notifique import Notifique
+
+client = Notifique(api_key='YOUR_API_KEY')
+result = client.whatsapp.send_text(instance_id, '5511999999999', 'Olá! 🐍')
 ```
 
 ### Java
+
 ```java
-Notifique notifique = new Notifique("...");
-WhatsAppSendEnvelope r = notifique.getWhatsApp().sendText(instanceId, "55119...", "Hello! ☕");
+Notifique client = new Notifique("YOUR_API_KEY");
+client.getWhatsApp().sendText(instanceId, "5511999999999", "Olá! ☕");
 ```
 
 ### Go
+
 ```go
-client := notifique.NewClient("...")
-r, _ := client.WhatsApp.SendText(instanceID, []string{"55119..."}, "Hello! 🐹")
+client := notifique.NewClient("YOUR_API_KEY")
+resp, err := client.WhatsApp.SendText(instanceID, []string{"5511999999999"}, "Olá! 🐹")
 ```
 
 ### PHP
+
 ```php
-$notifique = new Notifique('...');
-$notifique->whatsapp()->sendText($instanceId, '55119...', 'Hello! 🐘');
+$client = new Notifique\Notifique('YOUR_API_KEY');
+$client->whatsapp()->sendText($instanceId, '5511999999999', 'Olá! 🐘');
 ```
 
 ### C# (.NET)
+
 ```csharp
-var client = new NotifiqueClient("...");
-var response = await client.WhatsApp.SendTextAsync(instanceId, "55119...", "Hello! 🔷");
+using var client = new NotifiqueClient("YOUR_API_KEY");
+await client.WhatsApp.SendTextAsync(instanceId, "5511999999999", "Olá! 🔷");
 ```
 
 ### Elixir
+
 ```elixir
-client = Notifique.new("...")
-{:ok, body} = Notifique.Whatsapp.send_text(client, instance_id, ["55119..."], "Hello!")
+client = Notifique.new("YOUR_API_KEY")
+{:ok, body} = Notifique.Whatsapp.send_text(client, instance_id, ["5511999999999"], "Olá!")
 ```
 
 ---
 
-## O que está disponível em cada canal
+## ✅ Canais e Recursos
 
 ### WhatsApp
-- **Envio** — texto, imagem, vídeo, áudio, documento, localização, contato (com agendamento e opções).
-- **Mensagens** — listar, obter status, editar, apagar, cancelar.
-- **Instâncias** — listar, obter, criar, desconectar, excluir; obter QR da instância.
+- **Envio** — texto, imagem, vídeo, áudio, documento, localização, contato (com agendamento e opções)
+- **Mensagens** — listar, consultar status, editar, excluir, cancelar
+- **Instâncias** — listar, consultar, criar, desconectar, excluir; obter QR
+- **Opções** — webhook por mensagem, texto de resposta automática, fallback para SMS, chave de idempotência
 
 ### SMS
-- **Envio** — uma ou mais mensagens (1–100 números), com agendamento e opções.
-- **Status** — consultar por ID.
-- **Cancelar** — cancelar SMS agendado.
+- **Envio** — uma ou mais mensagens (1–100 números), com agendamento
+- **Status** — consultar por ID
+- **Cancelamento** — cancelar SMS agendado
 
 ### Email
-- **Envio** — um ou mais e-mails (remetente, assunto, texto/html), com agendamento.
-- **Status** — consultar por ID.
-- **Cancelar** — cancelar e-mail agendado.
-- **Domínios** — listar, criar, obter, verificar (DNS).
+- **Envio** — um ou mais emails (`from`, `subject`, `text/html`), com agendamento
+- **Status** — consultar por ID
+- **Cancelamento** — cancelar email agendado
+- **Domínios** — listar, criar, consultar, verificar (DNS)
 
 ### Push
-- **Apps** — listar, obter, criar, atualizar, excluir.
-- **Devices** — registrar (web/android/ios), listar, obter, excluir.
-- **Mensagens** — enviar, listar, obter, cancelar.
+- **Apps** — listar, consultar, criar, atualizar, excluir
+- **Dispositivos** — registrar (web/android/ios), listar, consultar, excluir
+- **Mensagens** — enviar, listar, consultar, cancelar
 
-### Messages (templates)
-- **Envio** — por template em múltiplos canais (whatsapp, sms, email) com variáveis e `instance_id`.
-
----
-
-## 🛡️ Robust & Tested
-
-Every SDK in this repository undergoes rigorous automated testing:
-- **Mocked HTTP interactions** for reliable unit tests.
-- **Strictly typed contracts** to prevent runtime errors.
-- **Comprehensive coverage** of all payload types.
+### Mensagens (templates)
+- Envio via template em múltiplos canais (whatsapp, sms, email) com variáveis
 
 ---
 
-## 📄 Documentation
+## 🛡️ Segurança
 
-For detailed installation and usage instructions, please refer to the individual package directories:
-
-- [Node.js SDK](./packages/sdk-node)
-- [n8n Node](./packages/n8n-nodes-notifique)
-- [Python SDK](./packages/sdk-python)
-- [Java SDK](./packages/sdk-java)
-- [Go SDK](./packages/sdk-go)
-- [PHP SDK](./packages/sdk-php)
-- [Elixir SDK](./packages/sdk-elixir)
-- [.NET SDK](./packages/sdk-dotnet)
+Todos os SDKs:
+- Validam a API key no momento da inicialização (falha rápida em vez de falhar na requisição)
+- Definem timeout de 30 segundos por padrão nas requisições
+- Utilizam HTTPS exclusivamente
+- Suportam chaves de idempotência em operações de envio (WhatsApp, SMS, Email, Push)
+- Lançam um erro tipado `NotifiqueApiError` / equivalente para respostas 4xx/5xx
 
 ---
 
-## 🏗️ Development
+## 🏗️ Estrutura do Monorepo
 
-This project uses a monorepo structure. 
-
-```text
+```
 notifique-sdk/
-├── packages/      # Pacotes dos SDKs
-└── examples/      # Exemplos em várias linguagens
+├── packages/
+│   ├── core/                  # Tipos TypeScript compartilhados
+│   ├── sdk-node/              # SDK Node.js / TypeScript
+│   ├── sdk-python/            # SDK Python
+│   ├── sdk-go/                # SDK Go
+│   ├── sdk-java/              # SDK Java
+│   ├── sdk-php/               # SDK PHP
+│   ├── sdk-elixir/            # SDK Elixir
+│   ├── sdk-dotnet/            # SDK .NET
+│   └── n8n-nodes-notifique/   # Node de comunidade do n8n
+└── examples/                  # Exemplos de uso por linguagem
+```
+
+---
+
+## 🧪 Testes
+
+```bash
+# Node.js (Jest — executa todos os testes TypeScript)
+npm test
+
+# Python
+cd packages/sdk-python && pytest
+
+# Go
+cd packages/sdk-go && go test ./...
+
+# .NET
+cd packages/sdk-dotnet && dotnet test
+
+# Java
+cd packages/sdk-java && mvn test
 ```
 
 ---
@@ -136,4 +164,3 @@ notifique-sdk/
 ## 📄 Licença
 
 MIT © [Notifique](https://notifique.com)
-

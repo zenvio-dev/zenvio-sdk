@@ -26,7 +26,7 @@ public sealed class PushApi
 
     public Task<PushAppSingleResponse> GetAppAsync(string id, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<PushAppSingleResponse>(HttpMethod.Get, $"/push/apps/{id}", cancellationToken: cancellationToken);
+        return _client.RequestAsync<PushAppSingleResponse>(HttpMethod.Get, $"/push/apps/{NotifiqueClient.EscapePathSegment(id)}", cancellationToken: cancellationToken);
     }
 
     public Task<PushAppSingleResponse> CreateAppAsync(PushAppCreateRequest request, CancellationToken cancellationToken = default)
@@ -36,12 +36,12 @@ public sealed class PushApi
 
     public Task<PushAppSingleResponse> UpdateAppAsync(string id, PushAppUpdateRequest request, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<PushAppSingleResponse>(HttpMethod.Put, $"/push/apps/{id}", request, cancellationToken);
+        return _client.RequestAsync<PushAppSingleResponse>(HttpMethod.Put, $"/push/apps/{NotifiqueClient.EscapePathSegment(id)}", request, cancellationToken);
     }
 
     public Task DeleteAppAsync(string id, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync(HttpMethod.Delete, $"/push/apps/{id}", null, cancellationToken);
+        return _client.RequestAsync(HttpMethod.Delete, $"/push/apps/{NotifiqueClient.EscapePathSegment(id)}", null, cancellationToken);
     }
 
     public Task<PushDeviceListResponse> ListDevicesAsync(CancellationToken cancellationToken = default)
@@ -62,7 +62,7 @@ public sealed class PushApi
 
     public Task<PushDeviceSingleResponse> GetDeviceAsync(string id, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<PushDeviceSingleResponse>(HttpMethod.Get, $"/push/devices/{id}", cancellationToken: cancellationToken);
+        return _client.RequestAsync<PushDeviceSingleResponse>(HttpMethod.Get, $"/push/devices/{NotifiqueClient.EscapePathSegment(id)}", cancellationToken: cancellationToken);
     }
 
     public Task<PushDeviceSingleResponse> RegisterDeviceAsync(PushDeviceRegisterRequest request, CancellationToken cancellationToken = default)
@@ -72,7 +72,7 @@ public sealed class PushApi
 
     public Task DeleteDeviceAsync(string id, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync(HttpMethod.Delete, $"/push/devices/{id}", null, cancellationToken);
+        return _client.RequestAsync(HttpMethod.Delete, $"/push/devices/{NotifiqueClient.EscapePathSegment(id)}", null, cancellationToken);
     }
 
     public Task<SendPushResponse> SendMessageAsync(SendPushRequest request, CancellationToken cancellationToken = default)
@@ -98,11 +98,11 @@ public sealed class PushApi
 
     public Task<PushMessageSingleResponse> GetMessageAsync(string id, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<PushMessageSingleResponse>(HttpMethod.Get, $"/push/messages/{id}", cancellationToken: cancellationToken);
+        return _client.RequestAsync<PushMessageSingleResponse>(HttpMethod.Get, $"/push/messages/{NotifiqueClient.EscapePathSegment(id)}", cancellationToken: cancellationToken);
     }
 
     public Task<CancelPushResponse> CancelMessageAsync(string id, CancellationToken cancellationToken = default)
     {
-        return _client.RequestAsync<CancelPushResponse>(HttpMethod.Post, $"/push/messages/{id}/cancel", null, cancellationToken);
+        return _client.RequestAsync<CancelPushResponse>(HttpMethod.Post, $"/push/messages/{NotifiqueClient.EscapePathSegment(id)}/cancel", null, cancellationToken);
     }
 }

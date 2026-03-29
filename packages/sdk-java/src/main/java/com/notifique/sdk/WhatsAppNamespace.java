@@ -55,20 +55,20 @@ public class WhatsAppNamespace {
 
     /** GET /v1/whatsapp/messages/:id — envelope success/data */
     public WhatsAppMessageEnvelope getMessage(String messageId) {
-        return client.request("GET", "/whatsapp/messages/" + messageId, null, WhatsAppMessageEnvelope.class);
+        return client.request("GET", "/whatsapp/messages/" + Notifique.encodePathSegment(messageId), null, WhatsAppMessageEnvelope.class);
     }
 
     public WhatsAppMessageActionResponse deleteMessage(String messageId) {
-        return client.request("DELETE", "/whatsapp/messages/" + messageId, null, WhatsAppMessageActionResponse.class);
+        return client.request("DELETE", "/whatsapp/messages/" + Notifique.encodePathSegment(messageId), null, WhatsAppMessageActionResponse.class);
     }
 
     public WhatsAppMessageActionResponse editMessage(String messageId, String text) {
-        return client.request("PATCH", "/whatsapp/messages/" + messageId + "/edit",
+        return client.request("PATCH", "/whatsapp/messages/" + Notifique.encodePathSegment(messageId) + "/edit",
                 Map.of("text", text), WhatsAppMessageActionResponse.class);
     }
 
     public WhatsAppMessageActionResponse cancelMessage(String messageId) {
-        return client.request("POST", "/whatsapp/messages/" + messageId + "/cancel", null, WhatsAppMessageActionResponse.class);
+        return client.request("POST", "/whatsapp/messages/" + Notifique.encodePathSegment(messageId) + "/cancel", null, WhatsAppMessageActionResponse.class);
     }
 
     public WhatsAppInstanceListResponse listInstances() {
@@ -87,12 +87,12 @@ public class WhatsAppNamespace {
     }
 
     public WhatsAppInstanceResponse getInstance(String instanceId) {
-        return client.request("GET", "/whatsapp/instances/" + instanceId, null, WhatsAppInstanceResponse.class);
+        return client.request("GET", "/whatsapp/instances/" + Notifique.encodePathSegment(instanceId), null, WhatsAppInstanceResponse.class);
     }
 
     /** GET /v1/whatsapp/instances/:id/qr */
     public WhatsAppInstanceQrResponse getInstanceQr(String instanceId) {
-        return client.request("GET", "/whatsapp/instances/" + instanceId + "/qr", null, WhatsAppInstanceQrResponse.class);
+        return client.request("GET", "/whatsapp/instances/" + Notifique.encodePathSegment(instanceId) + "/qr", null, WhatsAppInstanceQrResponse.class);
     }
 
     public WhatsAppCreateInstanceResponse createInstance(String name) {
@@ -100,10 +100,10 @@ public class WhatsAppNamespace {
     }
 
     public WhatsAppInstanceActionResponse disconnectInstance(String instanceId) {
-        return client.request("POST", "/whatsapp/instances/" + instanceId + "/disconnect", null, WhatsAppInstanceActionResponse.class);
+        return client.request("POST", "/whatsapp/instances/" + Notifique.encodePathSegment(instanceId) + "/disconnect", null, WhatsAppInstanceActionResponse.class);
     }
 
     public WhatsAppInstanceActionResponse deleteInstance(String instanceId) {
-        return client.request("DELETE", "/whatsapp/instances/" + instanceId, null, WhatsAppInstanceActionResponse.class);
+        return client.request("DELETE", "/whatsapp/instances/" + Notifique.encodePathSegment(instanceId), null, WhatsAppInstanceActionResponse.class);
     }
 }

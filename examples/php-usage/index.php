@@ -5,10 +5,16 @@ require_once __DIR__ . '/vendor/autoload.php';
 use Notifique\Notifique;
 use Notifique\Exception\NotifiqueApiException;
 
-$notifique = new Notifique(getenv('NOTIFIQUE_API_KEY') ?: 'your_api_key_here');
+$apiKey = getenv('NOTIFIQUE_API_KEY');
+$phoneId = getenv('NOTIFIQUE_INSTANCE_ID');
+$recipient = getenv('MY_PHONE');
 
-$phoneId = getenv('NOTIFIQUE_INSTANCE_ID') ?: 'your_phone_id_here';
-$recipient = getenv('MY_PHONE') ?: '5511999999999';
+if (!$apiKey || !$phoneId || !$recipient) {
+    fwrite(STDERR, "Set NOTIFIQUE_API_KEY, NOTIFIQUE_INSTANCE_ID and MY_PHONE before running this example.\n");
+    exit(1);
+}
+
+$notifique = new Notifique($apiKey);
 
 echo "--- Notifique PHP SDK Example ---\n";
 

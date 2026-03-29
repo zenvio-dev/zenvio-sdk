@@ -7,10 +7,13 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        Notifique notifique = new Notifique("your_api_key_here");
-
-        String instanceId = "your_instance_id_here";
-        String recipient = "5511999999999";
+        String apiKey = System.getenv("NOTIFIQUE_API_KEY");
+        String instanceId = System.getenv("NOTIFIQUE_INSTANCE_ID");
+        String recipient = System.getenv("MY_PHONE");
+        if (apiKey == null || instanceId == null || recipient == null) {
+            throw new IllegalStateException("Set NOTIFIQUE_API_KEY, NOTIFIQUE_INSTANCE_ID and MY_PHONE before running this example.");
+        }
+        Notifique notifique = new Notifique(apiKey);
 
         System.out.println("--- Notifique Java SDK Example ---");
 

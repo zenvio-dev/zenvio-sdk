@@ -31,12 +31,12 @@ class Sms
     /** GET /v1/sms/messages/:id */
     public function get(string $id): array
     {
-        return $this->client->request('GET', '/sms/messages/' . $id, null);
+        return $this->client->request('GET', '/sms/messages/' . Notifique::encodePathSegment($id), null);
     }
 
     /** POST /v1/sms/messages/:id/cancel — cancela SMS agendado (status SCHEDULED). Escopo: sms:cancel. */
     public function cancel(string $id): array
     {
-        return $this->client->request('POST', '/sms/messages/' . $id . '/cancel', null);
+        return $this->client->request('POST', '/sms/messages/' . Notifique::encodePathSegment($id) . '/cancel', null);
     }
 }

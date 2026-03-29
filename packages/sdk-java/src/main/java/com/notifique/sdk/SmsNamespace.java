@@ -20,10 +20,10 @@ public class SmsNamespace {
     }
 
     public SmsStatusResponse get(String messageId) {
-        return client.request("GET", "/sms/messages/" + messageId, null, SmsStatusResponse.class);
+        return client.request("GET", "/sms/messages/" + Notifique.encodePathSegment(messageId), null, SmsStatusResponse.class);
     }
 
     public SmsCancelResponse cancel(String messageId) {
-        return client.request("POST", "/sms/messages/" + messageId + "/cancel", null, SmsCancelResponse.class);
+        return client.request("POST", "/sms/messages/" + Notifique.encodePathSegment(messageId) + "/cancel", null, SmsCancelResponse.class);
     }
 }

@@ -24,6 +24,13 @@ class Notifique
 
     public function __construct(string $apiKey, string $baseUrl = 'https://api.notifique.dev/v1', array $guzzleOptions = [])
     {
+        if (trim($apiKey) === '') {
+            throw new \InvalidArgumentException('apiKey must be a non-empty string.');
+        }
+        $parsed = parse_url($baseUrl);
+        if (!is_array($parsed) || ($parsed['scheme'] ?? '') !== 'https' || empty($parsed['host'])) {
+            throw new \InvalidArgumentException('baseUrl must be an absolute HTTPS URL.');
+        }
         $this->apiKey = $apiKey;
         $this->baseUrl = rtrim($baseUrl, '/');
 
@@ -99,5 +106,10 @@ class Notifique
         }
 
         return $decoded;
+    }
+
+    public static function encodePathSegment(string $segment): string
+    {
+        return rawurlencode($segment);
     }
 }

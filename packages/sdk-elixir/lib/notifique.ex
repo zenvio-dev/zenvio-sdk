@@ -15,6 +15,15 @@ defmodule Notifique do
   base_url padrão: https://api.notifique.dev/v1
   """
   def new(api_key, base_url \\ "https://api.notifique.dev/v1") do
+    if !is_binary(api_key) or String.trim(api_key) == "" do
+      raise ArgumentError, "api_key must be a non-empty string"
+    end
+
+    uri = URI.parse(base_url)
+    if uri.scheme != "https" or is_nil(uri.host) do
+      raise ArgumentError, "base_url must be an absolute HTTPS URL"
+    end
+
     %__MODULE__{
       api_key: api_key,
       base_url: String.trim_trailing(base_url, "/")
@@ -32,6 +41,7 @@ defmodule Notifique do
     base = [
       method: method,
       url: url,
+      receive_timeout: 30_000,
       headers: [
         {"content-type", "application/json"},
         {"user-agent", "Notifique-Elixir-SDK/0.2.0"}
@@ -58,4 +68,6 @@ defmodule Notifique do
 
   defp maybe_put_json(opts, nil), do: opts
   defp maybe_put_json(opts, body), do: Keyword.put(opts, :json, body)
+
+  def encode_path_segment(segment), do: URI.encode(segment, &URI.char_unreserved?/1)
 end

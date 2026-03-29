@@ -1,128 +1,153 @@
 # Notifique Python SDK
 
-SDK oficial Notifique para Python — **WhatsApp**, **SMS**, **Email**, **Push** e envio por **template**. Tipado com `TypedDict`.
+Official Notifique SDK for Python — **WhatsApp**, **SMS**, **Email**, **Push**, and multi-channel template sends. Fully typed with `TypedDict`.
 
-## Instalação
+## Installation
 
 ```bash
 pip install notifique-sdk
 ```
 
-## Uso
+## Quick Start
 
 ```python
 from notifique import Notifique
 
-notifique = Notifique(api_key="sua_api_key")
-# base_url padrão: https://api.notifique.dev/v1
+# Create once and reuse — the client holds a persistent HTTP session.
+with Notifique(api_key="your-api-key") as client:
+    result = client.whatsapp.send_text("instance-id", "5511999999999", "Hello!")
+
+print(result["data"]["messageIds"])
 ```
 
-### WhatsApp
+### Constructor options
 
-- **POST /v1/whatsapp/messages** — `instance_id` no body.
-- Texto: `payload.message`. Mídia: `payload.mediaUrl`, `fileName`, `mimetype`.
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str` | required | Your Notifique API key |
+| `base_url` | `str` | `https://api.notifique.dev/v1` | API base URL (HTTPS only) |
+| `timeout` | `int` | `30` | Request timeout in seconds |
+
+## WhatsApp
 
 ```python
-# Texto
-r = notifique.whatsapp.send_text(instance_id, "5511999999999", "Olá!")
+# Text (shortcut)
+client.whatsapp.send_text(instance_id, "5511999999999", "Hello!")
 
-# Envio completo (text, image, video, audio, document, location, contact)
-r = notifique.whatsapp.send(instance_id, {
+# Full send (text, image, video, audio, document, location, contact)
+client.whatsapp.send(instance_id, {
     "to": ["5511999999999"],
     "type": "text",
-    "payload": {"message": "Oi"},
+    "payload": {"message": "Hello!"},
+    "options": {
+        "webhook": {"url": "https://your-domain.com/hooks/notifique"},
+        "fallback": {"channel": "sms"},
+    },
 })
 
-# Listar mensagens, status, apagar, editar, cancelar
-lista = notifique.whatsapp.list_messages(params={"page": "1", "limit": "20"})
-status = notifique.whatsapp.get_message(message_id)  # retorna envelope success/data
-notifique.whatsapp.delete_message(message_id)
-notifique.whatsapp.edit_message(message_id, "Novo texto")
-notifique.whatsapp.cancel_message(message_id)
+# Image
+client.whatsapp.send(instance_id, {
+    "to": ["5511999999999"],
+    "type": "image",
+    "payload": {"mediaUrl": "https://example.com/img.png", "fileName": "img.png", "mimetype": "image/png"},
+})
 
-# Instâncias e QR
-instances = notifique.whatsapp.list_instances()
-one = notifique.whatsapp.get_instance(instance_id)
-qr = notifique.whatsapp.get_instance_qr(instance_id)
-notifique.whatsapp.create_instance({"name": "Minha Instância"})
-notifique.whatsapp.disconnect_instance(instance_id)
-notifique.whatsapp.delete_instance(instance_id)
+# Message management
+client.whatsapp.list_messages(params={"page": "1", "limit": "20"})
+client.whatsapp.get_message(message_id)
+client.whatsapp.edit_message(message_id, "New text")
+client.whatsapp.delete_message(message_id)
+client.whatsapp.cancel_message(message_id)  # cancel scheduled
+
+# Instance management
+client.whatsapp.list_instances()
+client.whatsapp.get_instance(instance_id)
+client.whatsapp.get_instance_qr(instance_id)
+client.whatsapp.create_instance({"name": "My Instance"})
+client.whatsapp.disconnect_instance(instance_id)
+client.whatsapp.delete_instance(instance_id)
 ```
 
-### SMS
+## SMS
 
 ```python
-r = notifique.sms.send({"to": ["5511999999999"], "message": "SMS de teste"})
-status = notifique.sms.get(sms_id)
-notifique.sms.cancel(sms_id)
+client.sms.send({"to": ["5511999999999"], "message": "SMS text"})
+client.sms.get(sms_id)
+client.sms.cancel(sms_id)
 ```
 
-### Email
-
-- Use **`from`** (camelCase). Alternativa: `from_address` é convertido para `from`.
+## Email
 
 ```python
-r = notifique.email.send({
-    "from": "noreply@seudominio.com",
+# The `from` key is a Python reserved word — use it as a string key in a dict.
+# Alternatively, `from_address` is accepted as an alias and translated automatically.
+client.email.send({
+    "from": "noreply@yourdomain.com",
     "to": ["user@example.com"],
-    "subject": "Assunto",
-    "html": "<p>Corpo</p>",
+    "subject": "Subject",
+    "html": "<p>HTML body</p>",
 })
-status = notifique.email.get(email_id)
-notifique.email.cancel(email_id)
 
-# Domínios
-domains = notifique.email.domains.list()
-notifique.email.domains.create({"domain": "seudominio.com"})
-notifique.email.domains.get(domain_id)
-notifique.email.domains.verify(domain_id)
+client.email.get(email_id)
+client.email.cancel(email_id)
+
+# Domain management
+client.email.domains.list()
+client.email.domains.create({"domain": "yourdomain.com"})
+client.email.domains.get(domain_id)
+client.email.domains.verify(domain_id)
 ```
 
-### Push
+## Push
 
 ```python
 # Apps
-notifique.push.apps.list()
-notifique.push.apps.get(app_id)
-notifique.push.apps.create({"name": "Meu App"})
-notifique.push.apps.update(app_id, {"name": "Novo nome"})
-notifique.push.apps.delete(app_id)
+client.push.apps.list()
+client.push.apps.get(app_id)
+client.push.apps.create({"name": "My App"})
+client.push.apps.update(app_id, {"name": "New name"})
+client.push.apps.delete(app_id)
 
-# Dispositivos
-notifique.push.devices.register({"appId": app_id, "platform": "web", "subscription": {...}})
-notifique.push.devices.list(params={"appId": app_id})
-notifique.push.devices.get(device_id)
-notifique.push.devices.delete(device_id)
+# Devices
+client.push.devices.register({"appId": app_id, "platform": "web", "subscription": {
+    "endpoint": "https://...", "keys": {"p256dh": "...", "auth": "..."}
+}})
+client.push.devices.list(params={"appId": app_id})
+client.push.devices.get(device_id)
+client.push.devices.delete(device_id)
 
-# Mensagens
-notifique.push.messages.send({"to": [device_id], "title": "Título", "body": "Corpo"})
-notifique.push.messages.list()
-notifique.push.messages.get(message_id)
-notifique.push.messages.cancel(message_id)
+# Messages
+client.push.messages.send({"to": [device_id], "title": "Title", "body": "Body"})
+client.push.messages.list()
+client.push.messages.get(message_id)
+client.push.messages.cancel(message_id)
 ```
 
-### Mensagens por template (whatsapp + sms + email)
+## Multi-channel Template Send
 
 ```python
-r = notifique.messages.send({
+client.messages.send({
     "to": ["5511999999999", "user@example.com"],
     "template": "welcome",
-    "variables": {"name": "Trial", "credits": 300},
+    "variables": {"name": "Alice", "credits": 300},
     "channels": ["whatsapp", "sms", "email"],
-    "instanceId": "sua_instancia_id",
-    "from": "noreply@seudominio.com",
+    "instanceId": "your-instance-id",    # or "instance_id" — both accepted
+    "from": "noreply@yourdomain.com",    # or "from_address" — both accepted
 })
 ```
 
-## Tipos
+## Error Handling
 
-Tipos em `notifique.types` (reexportados em `notifique`): WhatsApp, SMS, Email, Email Domains, Push (apps, devices, messages), Messages.
+```python
+from notifique import Notifique, NotifiqueApiError
 
-## Erros
+try:
+    client.whatsapp.send_text(instance_id, "5511999999999", "Hello")
+except NotifiqueApiError as e:
+    print(e.status_code, e.message, e.response_data)
+```
 
-Em 4xx/5xx o cliente chama `response.raise_for_status()`; use `try/except requests.HTTPError`.
-
-## Requisitos
+## Requirements
 
 - Python 3.8+
-- `requests`
+- `requests >= 2.31.0`

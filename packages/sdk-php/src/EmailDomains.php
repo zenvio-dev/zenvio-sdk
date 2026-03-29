@@ -29,12 +29,12 @@ class EmailDomains
     /** GET /v1/email/domains/:id */
     public function get(string $id): array
     {
-        return $this->client->request('GET', '/email/domains/' . $id, null);
+        return $this->client->request('GET', '/email/domains/' . Notifique::encodePathSegment($id), null);
     }
 
     /** POST /v1/email/domains/:id/verify */
     public function verify(string $id): array
     {
-        return $this->client->request('POST', '/email/domains/' . $id . '/verify', null);
+        return $this->client->request('POST', '/email/domains/' . Notifique::encodePathSegment($id) . '/verify', null);
     }
 }

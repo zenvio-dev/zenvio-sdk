@@ -22,11 +22,11 @@ public class EmailNamespace {
     }
 
     public EmailStatusResponse get(String messageId) {
-        return client.request("GET", "/email/messages/" + messageId, null, EmailStatusResponse.class);
+        return client.request("GET", "/email/messages/" + Notifique.encodePathSegment(messageId), null, EmailStatusResponse.class);
     }
 
     public EmailCancelResponse cancel(String messageId) {
-        return client.request("POST", "/email/messages/" + messageId + "/cancel", null, EmailCancelResponse.class);
+        return client.request("POST", "/email/messages/" + Notifique.encodePathSegment(messageId) + "/cancel", null, EmailCancelResponse.class);
     }
 
     /** GET/POST /v1/email/domains, GET /v1/email/domains/{id}, POST /v1/email/domains/{id}/verify */

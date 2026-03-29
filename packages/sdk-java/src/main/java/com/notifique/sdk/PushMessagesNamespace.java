@@ -33,10 +33,10 @@ public class PushMessagesNamespace {
     }
 
     public PushMessageSingleResponse get(String messageId) {
-        return client.request("GET", "/push/messages/" + messageId, null, PushMessageSingleResponse.class);
+        return client.request("GET", "/push/messages/" + Notifique.encodePathSegment(messageId), null, PushMessageSingleResponse.class);
     }
 
     public CancelPushResponse cancel(String messageId) {
-        return client.request("POST", "/push/messages/" + messageId + "/cancel", null, CancelPushResponse.class);
+        return client.request("POST", "/push/messages/" + Notifique.encodePathSegment(messageId) + "/cancel", null, CancelPushResponse.class);
     }
 }

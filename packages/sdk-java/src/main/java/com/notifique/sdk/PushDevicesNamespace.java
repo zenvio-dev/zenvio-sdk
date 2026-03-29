@@ -33,10 +33,10 @@ public class PushDevicesNamespace {
     }
 
     public PushDeviceSingleResponse get(String deviceId) {
-        return client.request("GET", "/push/devices/" + deviceId, null, PushDeviceSingleResponse.class);
+        return client.request("GET", "/push/devices/" + Notifique.encodePathSegment(deviceId), null, PushDeviceSingleResponse.class);
     }
 
     public void delete(String deviceId) {
-        client.request("DELETE", "/push/devices/" + deviceId, null, Void.class);
+        client.request("DELETE", "/push/devices/" + Notifique.encodePathSegment(deviceId), null, Void.class);
     }
 }

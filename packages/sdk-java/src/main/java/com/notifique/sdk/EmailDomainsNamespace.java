@@ -25,10 +25,10 @@ public class EmailDomainsNamespace {
     }
 
     public GetEmailDomainResponse get(String domainId) {
-        return client.request("GET", "/email/domains/" + domainId, null, GetEmailDomainResponse.class);
+        return client.request("GET", "/email/domains/" + Notifique.encodePathSegment(domainId), null, GetEmailDomainResponse.class);
     }
 
     public VerifyEmailDomainResponse verify(String domainId) {
-        return client.request("POST", "/email/domains/" + domainId + "/verify", null, VerifyEmailDomainResponse.class);
+        return client.request("POST", "/email/domains/" + Notifique.encodePathSegment(domainId) + "/verify", null, VerifyEmailDomainResponse.class);
     }
 }

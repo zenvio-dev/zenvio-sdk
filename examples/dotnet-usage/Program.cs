@@ -4,10 +4,14 @@ using Notifique.Models.Sms;
 using Notifique.Models.Email;
 using Notifique.Models.Messages;
 
-var apiKey = Environment.GetEnvironmentVariable("NOTIFIQUE_API_KEY") ?? "your-api-key";
-var instanceId = Environment.GetEnvironmentVariable("NOTIFIQUE_INSTANCE_ID") ?? "your-instance-id";
-var phoneNumber = "5511967741929";
-var email = "user@example.com";
+var apiKey = Environment.GetEnvironmentVariable("NOTIFIQUE_API_KEY");
+var instanceId = Environment.GetEnvironmentVariable("NOTIFIQUE_INSTANCE_ID");
+var phoneNumber = Environment.GetEnvironmentVariable("MY_PHONE");
+var email = Environment.GetEnvironmentVariable("MY_EMAIL");
+if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(instanceId) || string.IsNullOrWhiteSpace(phoneNumber) || string.IsNullOrWhiteSpace(email))
+{
+    throw new InvalidOperationException("Set NOTIFIQUE_API_KEY, NOTIFIQUE_INSTANCE_ID, MY_PHONE and MY_EMAIL before running this example.");
+}
 
 using var client = new NotifiqueClient(apiKey);
 

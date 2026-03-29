@@ -24,7 +24,7 @@ export class NotifiqueApi implements ICredentialType {
       type: 'string',
       default: 'https://api.notifique.dev/v1',
       placeholder: 'https://api.notifique.dev/v1',
-      description: 'Base URL for Notifique API',
+      description: 'Base URL for Notifique API (HTTPS only)',
     },
   ];
 }

@@ -60,25 +60,25 @@ class Whatsapp
     /** GET /v1/whatsapp/messages/:messageId — retorna envelope success/data */
     public function getMessage(string $messageId): array
     {
-        return $this->client->request('GET', '/whatsapp/messages/' . $messageId, null);
+        return $this->client->request('GET', '/whatsapp/messages/' . Notifique::encodePathSegment($messageId), null);
     }
 
     /** DELETE /v1/whatsapp/messages/:messageId */
     public function deleteMessage(string $messageId): array
     {
-        return $this->client->request('DELETE', '/whatsapp/messages/' . $messageId, null);
+        return $this->client->request('DELETE', '/whatsapp/messages/' . Notifique::encodePathSegment($messageId), null);
     }
 
     /** PATCH /v1/whatsapp/messages/:messageId/edit */
     public function editMessage(string $messageId, string $text): array
     {
-        return $this->client->request('PATCH', '/whatsapp/messages/' . $messageId . '/edit', ['text' => $text]);
+        return $this->client->request('PATCH', '/whatsapp/messages/' . Notifique::encodePathSegment($messageId) . '/edit', ['text' => $text]);
     }
 
     /** POST /v1/whatsapp/messages/:messageId/cancel */
     public function cancelMessage(string $messageId): array
     {
-        return $this->client->request('POST', '/whatsapp/messages/' . $messageId . '/cancel', null);
+        return $this->client->request('POST', '/whatsapp/messages/' . Notifique::encodePathSegment($messageId) . '/cancel', null);
     }
 
     /**
@@ -97,13 +97,13 @@ class Whatsapp
     /** GET /v1/whatsapp/instances/:instanceId */
     public function getInstance(string $instanceId): array
     {
-        return $this->client->request('GET', '/whatsapp/instances/' . $instanceId, null);
+        return $this->client->request('GET', '/whatsapp/instances/' . Notifique::encodePathSegment($instanceId), null);
     }
 
     /** GET /v1/whatsapp/instances/:instanceId/qr */
     public function getInstanceQr(string $instanceId): array
     {
-        return $this->client->request('GET', '/whatsapp/instances/' . $instanceId . '/qr', null);
+        return $this->client->request('GET', '/whatsapp/instances/' . Notifique::encodePathSegment($instanceId) . '/qr', null);
     }
 
     /**
@@ -119,12 +119,12 @@ class Whatsapp
     /** POST /v1/whatsapp/instances/:instanceId/disconnect */
     public function disconnectInstance(string $instanceId): array
     {
-        return $this->client->request('POST', '/whatsapp/instances/' . $instanceId . '/disconnect', null);
+        return $this->client->request('POST', '/whatsapp/instances/' . Notifique::encodePathSegment($instanceId) . '/disconnect', null);
     }
 
     /** DELETE /v1/whatsapp/instances/:instanceId */
     public function deleteInstance(string $instanceId): array
     {
-        return $this->client->request('DELETE', '/whatsapp/instances/' . $instanceId, null);
+        return $this->client->request('DELETE', '/whatsapp/instances/' . Notifique::encodePathSegment($instanceId), null);
     }
 }

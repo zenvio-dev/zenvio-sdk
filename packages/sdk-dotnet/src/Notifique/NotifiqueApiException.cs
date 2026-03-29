@@ -6,7 +6,7 @@ public class NotifiqueApiException : Exception
     public string ResponseBody { get; }
 
     public NotifiqueApiException(int statusCode, string responseBody)
-        : base($"Notifique API error {statusCode}: {responseBody}")
+        : base($"Notifique API error {statusCode}")
     {
         StatusCode = statusCode;
         ResponseBody = responseBody;

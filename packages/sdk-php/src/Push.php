@@ -45,7 +45,7 @@ class PushApps
 
     public function get(string $id): array
     {
-        return $this->client->request('GET', '/push/apps/' . $id, null);
+        return $this->client->request('GET', '/push/apps/' . Notifique::encodePathSegment($id), null);
     }
 
     public function create(array $params): array
@@ -55,12 +55,12 @@ class PushApps
 
     public function update(string $id, array $params): array
     {
-        return $this->client->request('PUT', '/push/apps/' . $id, $params);
+        return $this->client->request('PUT', '/push/apps/' . Notifique::encodePathSegment($id), $params);
     }
 
     public function delete(string $id): array
     {
-        return $this->client->request('DELETE', '/push/apps/' . $id, null);
+        return $this->client->request('DELETE', '/push/apps/' . Notifique::encodePathSegment($id), null);
     }
 }
 
@@ -92,12 +92,12 @@ class PushDevices
 
     public function get(string $id): array
     {
-        return $this->client->request('GET', '/push/devices/' . $id, null);
+        return $this->client->request('GET', '/push/devices/' . Notifique::encodePathSegment($id), null);
     }
 
     public function delete(string $id): array
     {
-        return $this->client->request('DELETE', '/push/devices/' . $id, null);
+        return $this->client->request('DELETE', '/push/devices/' . Notifique::encodePathSegment($id), null);
     }
 }
 
@@ -138,11 +138,11 @@ class PushMessages
 
     public function get(string $id): array
     {
-        return $this->client->request('GET', '/push/messages/' . $id, null);
+        return $this->client->request('GET', '/push/messages/' . Notifique::encodePathSegment($id), null);
     }
 
     public function cancel(string $id): array
     {
-        return $this->client->request('POST', '/push/messages/' . $id . '/cancel', null);
+        return $this->client->request('POST', '/push/messages/' . Notifique::encodePathSegment($id) . '/cancel', null);
     }
 }
