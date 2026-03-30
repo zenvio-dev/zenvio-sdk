@@ -23,7 +23,7 @@ defmodule Notifique.MixProject do
 
   defp deps do
     [
-      {:req, "~> 0.4.0"},
+      {:req, "~> 0.5.17"},
       {:jason, "~> 1.4"},
       {:ex_doc, ">= 0.0.0", runtime: false}
     ]
