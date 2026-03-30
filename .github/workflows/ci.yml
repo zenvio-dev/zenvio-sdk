@@ -47,6 +47,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "1.22"
+          cache: false
 
       - name: Run go tests
         working-directory: packages/sdk-go
@@ -102,7 +103,7 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore
-        run: dotnet restore packages/sdk-dotnet/tests/Notifique.Tests/Notifique.Tests.csproj
+        run: dotnet restore packages/sdk-dotnet/Notifique.sln
 
       - name: Test
-        run: dotnet test packages/sdk-dotnet/tests/Notifique.Tests/Notifique.Tests.csproj --configuration Release --no-restore
+        run: dotnet test packages/sdk-dotnet/Notifique.sln --configuration Release --no-restore
